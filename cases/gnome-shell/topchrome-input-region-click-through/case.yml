@@ -1,0 +1,38 @@
+id: gnome-shell-topchrome-input-region-click-through
+title: "Custom popup or window preview is visible but mouse clicks pass through to underlying windows"
+status: verified
+stack:
+  - gnome-shell
+  - clutter
+  - st
+  - mutter
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any GPU"
+  extra: "Wayland and X11 GNOME Shell Sessions"
+symptoms:
+  - "Custom popover or window preview card is rendered on screen but ignores mouse clicks"
+  - "Clicks pass through the preview card and activate elements in windows underneath"
+expected_behavior: "Custom popover/preview card captures mouse hover and button clicks reliably"
+trigger: "Add a floating popover actor to Main.uiGroup without registering it in Mutter input region"
+root_cause: "Adding an actor via Main.uiGroup.add_actor() places it in the visual scene graph, but does not include its bounds in Mutter's interactive input region. Mutter filters pointer events based on its tracked input region mask."
+failed_approaches:
+  - approach: "Setting reactive: true and track_hover: true on St.BoxLayout"
+    result: "Clutter actor parameters do not override Mutter input region masking"
+fix_summary: "Register the popup actor using Main.layoutManager.addTopChrome(popup, { affectsInputRegion: true, trackFullscreen: true }). Additionally, set button_mask: St.ButtonMask.ONE on interactive St.Button children."
+verification:
+  automated: true
+  command: "node --check right-dock@pasynkov/appIcon.js"
+  manual_steps:
+    - "Hover an app icon to show the window preview popup"
+    - "Click close or maximize buttons on the preview card"
+    - "Verify the button action executes and clicks do not pass through to background windows"
+regression_risks:
+  - "Failing to remove TopChrome actor upon hide/destroy, causing invisible input blocks"
+sources:
+  - "https://gnome.pages.gitlab.gnome.org/gnome-shell/ui/ui/layout.html"
+last_verified: "2026-08-06"

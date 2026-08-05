@@ -1,0 +1,42 @@
+id: gnome-shell-fullscreen-dock-autohide
+title: "Dock extension fails to hide or stays visible over fullscreen games during Alt+Tab"
+status: verified
+stack:
+  - gnome-shell
+  - gjs
+  - mutter
+  - clutter
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any GPU"
+  extra: "Fullscreen 3D Games / Applications (Wayland and X11)"
+symptoms:
+  - "Dock stays visible over fullscreen game windows when switching windows via Alt+Tab"
+  - "Mouse polling or raise_top() calls periodically pull the dock back onto the screen during fullscreen gameplay"
+expected_behavior: "Dock hides completely (hide() and reactive = false) whenever a fullscreen window is active on the monitor, ignoring mouse triggers until fullscreen mode exits"
+trigger: "Switch focus to a fullscreen game window using Alt+Tab or launch a game in fullscreen mode"
+root_cause: "Listening solely to notify::fullscreen or in-fullscreen-changed on individual window actors fails when focus transitions between windows via Alt+Tab without window property mutation. Additionally, trackFullscreen: true without actor.hide(), reactive = false, and barrier destruction allows mouse edge polling and raise_top() calls to re-show the dock over fullscreen games."
+failed_approaches:
+  - approach: "Connecting only to in-fullscreen-changed signal on Meta.Window"
+    result: "Fails on Alt+Tab because window fullscreen property does not change when focus shifts to an existing fullscreen window"
+  - approach: "Moving dock position off-screen via ease({ x: monitor.width })"
+    result: "Mouse polling and pressure barrier callbacks bring the dock back on screen after 100ms"
+fix_summary: "Implement FullscreenController listening to global.display signals notify::focus-window, in-fullscreen-changed, and restacked with GLib.idle_add debouncing. Validate focused window fullscreen state and get_monitor_in_fullscreen(). On fullscreen, invoke hide(), reactive = false, and destroy barriers."
+verification:
+  automated: true
+  command: "node --check right-dock@pasynkov/autohide.js"
+  manual_steps:
+    - "Launch a fullscreen application or game"
+    - "Use Alt+Tab to switch focus to and from the fullscreen application"
+    - "Move the mouse cursor to the right monitor edge and verify the dock remains completely hidden and non-interactive"
+    - "Exit fullscreen mode and verify dock visibility restores immediately"
+regression_risks:
+  - "Dock remaining permanently hidden after exiting a crashed game"
+  - "Pressure barriers failing to re-initialize after exiting fullscreen"
+sources:
+  - "https://gnome.pages.gitlab.gnome.org/mutter/meta/class.Display.html"
+last_verified: "2026-08-06"

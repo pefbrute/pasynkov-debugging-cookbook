@@ -1,0 +1,36 @@
+id: gnome-shell-top-panel-opacity-invisible-strip
+title: "Hiding top panel with opacity=0 leaves an invisible top dead zone"
+status: verified
+stack:
+  - gnome-shell
+  - st
+  - mutter
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, St)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any GPU"
+  extra: "Wayland and X11 GNOME Shell Sessions"
+symptoms:
+  - "Top panel is transparent, but top 32px of monitor is unresponsive to window clicks or window title drag"
+expected_behavior: "Top panel is completely removed from layout, allowing windows to occupy the top 32px seamlessly"
+trigger: "Attempting to hide GNOME Shell top panel using Main.panel.opacity = 0"
+root_cause: "Setting Main.panel.opacity = 0 makes the actor transparent, but leaves it registered in Mutter layout manager and input region. The top panel continues occupying ~32px physical height."
+failed_approaches:
+  - approach: "Main.panel.opacity = 0"
+    result: "Panel is invisible but continues blocking mouse events and occupying layout space"
+fix_summary: "Replace Main.panel.opacity = 0 with Main.panel.hide() and Main.panel.reactive = false. Restore with Main.panel.show() and Main.panel.reactive = true."
+verification:
+  automated: true
+  command: "node --check right-dock@pasynkov/extension.js"
+  manual_steps:
+    - "Enable extension"
+    - "Move application window to the very top edge of the screen"
+    - "Verify mouse clicks on the top window title bar work cleanly"
+regression_risks:
+  - "Failing to call Main.panel.show() in disable(), leaving user without top panel"
+sources:
+  - "https://gnome.pages.gitlab.gnome.org/mutter/clutter/class.Actor.html"
+last_verified: "2026-08-06"

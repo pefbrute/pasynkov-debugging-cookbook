@@ -1,0 +1,38 @@
+id: gnome-shell-extension-prefs-dbus-spawn-focus
+title: "Extension preferences window fails to open or doesn't raise to front on repeated click"
+status: verified
+stack:
+  - gnome-shell
+  - gjs
+  - meta
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, Meta)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any GPU"
+  extra: "Wayland and X11 GNOME Shell Sessions"
+symptoms:
+  - "Clicking extension settings button throws JS signature error across GNOME Shell versions"
+  - "Clicking settings button when window is already open does nothing instead of focusing it"
+expected_behavior: "Clicking settings button opens prefs window or raises existing prefs window to front across all GNOME Shell versions"
+trigger: "Click settings button in extension UI"
+root_cause: "Signature differences in Main.extensionManager.openExtensionPrefs across GNOME 42 vs 45 vs 46, and lack of window list check before spawning new process."
+failed_approaches:
+  - approach: "Calling openExtensionPrefs(uuid) without version fallback or window focus check"
+    result: "Throws error on GNOME 45+ or opens redundant duplicate windows"
+fix_summary: "Iterate Meta.TabList.NORMAL via global.display.get_tab_list. If prefs window is open, unminimize, activate workspace, and call Main.activateWindow. If not open, call openExtensionPrefs with Util.spawn fallback."
+verification:
+  automated: true
+  command: "node --check right-dock@pasynkov/extension.js"
+  manual_steps:
+    - "Click Settings button in dock"
+    - "Verify prefs window opens"
+    - "Minimize or move window behind other windows, then click Settings button again"
+    - "Verify existing prefs window raises to front and receives focus"
+regression_risks:
+  - "Failing to match window wm_class or title"
+sources:
+  - "https://gjs.guide/extensions/topics/preferences.html"
+last_verified: "2026-08-06"

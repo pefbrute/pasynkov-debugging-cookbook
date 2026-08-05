@@ -1,0 +1,37 @@
+id: gnome-shell-click-outside-menu-dismissal
+title: "Custom PopupMenu stays open when clicking outside on desktop or workspace"
+status: verified
+stack:
+  - gnome-shell
+  - gjs
+  - clutter
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, Clutter)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any GPU"
+  extra: "Wayland and X11 GNOME Shell Sessions"
+symptoms:
+  - "Custom PopupMenu or popover remains open when clicking outside on another window, background, or panel"
+  - "Closing popup synchronously on notify::focus-window causes Error: incorrect pop race condition"
+expected_behavior: "Clicking outside an active context menu closes all open menus cleanly while letting the target click propagate"
+trigger: "Open a custom PopupMenu and click outside on a workspace window or background"
+root_cause: "Custom PopupMenus outside Main.panel.menuManager lack global stage click interception. Synchronous closing inside focus-window handlers interferes with Mutter's active menu pop stack."
+failed_approaches:
+  - approach: "Closing menu synchronously in notify::focus-window"
+    result: "Throws Error: incorrect pop because menu state mutates during focus dispatch"
+fix_summary: "Attach captured-event listener to global.stage. On BUTTON_PRESS outside menu actor bounds, schedule menu dismissal via GLib.idle_add(GLib.PRIORITY_DEFAULT, ...) and return Clutter.EVENT_PROPAGATE."
+verification:
+  automated: true
+  command: "node --check right-dock@pasynkov/extension.js"
+  manual_steps:
+    - "Right click to open dock context menu"
+    - "Click outside on a workspace window or background"
+    - "Verify menu closes cleanly and target window receives focus"
+regression_risks:
+  - "Captured-event listener leaking memory if not disconnected in disable()"
+sources:
+  - "https://gjs.guide/extensions/topics/popup-menu.html"
+last_verified: "2026-08-06"

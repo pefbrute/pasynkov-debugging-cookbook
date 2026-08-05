@@ -1,0 +1,36 @@
+id: gnome-shell-stolen-tray-indicator-alignment
+title: "Stolen statusArea indicators distorted or misaligned in custom grid"
+status: verified
+stack:
+  - gnome-shell
+  - st
+  - clutter
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, St, Clutter)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any GPU"
+  extra: "Wayland and X11 GNOME Shell Sessions"
+symptoms:
+  - "Stolen GNOME Shell statusArea indicators render stretched, oversized, or misaligned with huge padding in custom tray grid"
+expected_behavior: "Stolen tray indicators preserve active state and render cleanly in 32x32px slots inside a 3-column row grid"
+trigger: "Remove indicator actors from Main.panel._rightBox or statusArea and add them directly to a custom St.BoxLayout or St.Bin"
+root_cause: "Indicators inherit top-panel theme rules (-natural-hpadding, -minimum-hpadding) and container alignment parameters from Main.panel._rightBox. Adding them directly to custom containers without state saving, CSS resets, and size constraining distorts layout."
+failed_approaches:
+  - approach: "Direct re-parenting without saving original properties or applying CSS overrides"
+    result: "Icons render overflowing 32px constraints with unequal padding"
+fix_summary: "Save actor state (x_align, y_align, style), constrain sizes recursively (constrainActorRecursive), wrap in 32x32px TrayIconWrapper with clip_to_allocation: false, and apply CSS resets (-natural-hpadding: 0; margin: 0; padding: 0;)."
+verification:
+  automated: true
+  command: "node --check right-dock@pasynkov/stolenTray.js"
+  manual_steps:
+    - "Launch applications with status indicators (Telegram, Steam, Discord)"
+    - "Verify indicator icons align in 32x32px slots in a 3-column grid"
+    - "Disable extension and verify indicators return to default top panel undamaged"
+regression_risks:
+  - "Indicator signals breaking upon return to top panel"
+sources:
+  - "https://gjs.guide/extensions/topics/panel-menu-button.html"
+last_verified: "2026-08-06"

@@ -1,0 +1,36 @@
+id: gnome-shell-window-struts-reserved-space
+title: "Maximized windows extend under custom GNOME Shell panel or dock"
+status: verified
+stack:
+  - gnome-shell
+  - mutter
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, Mutter)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any GPU"
+  extra: "Wayland and X11 GNOME Shell Sessions"
+symptoms:
+  - "Maximized application windows slide underneath the custom panel/dock"
+  - "Resizing windows manually pushes window title bars under the panel"
+expected_behavior: "Mutter reserves screen edge space according to dock width and automatically constrains maximized/tiled application windows outside the dock area"
+trigger: "Add a custom panel to GNOME Shell and maximize any application window"
+root_cause: "Adding a custom panel actor using Main.layoutManager.addChrome() without specifying affectsStruts: true. Mutter's layout manager remains unaware that screen edge space must be reserved and does not emit _NET_WM_STRUT_PARTIAL window constraints."
+failed_approaches:
+  - approach: "Setting custom window workarea constraints in JavaScript manually"
+    result: "Overridden by Mutter window manager during workspace restacking and window creation"
+fix_summary: "Pass affectsStruts: true in Main.layoutManager.addChrome(dockActor, { affectsStruts: true, affectsInputRegion: true, trackFullscreen: true }). Mutter automatically creates and manages window struts for the panel actor."
+verification:
+  automated: true
+  command: "node --check right-dock@pasynkov/extension.js"
+  manual_steps:
+    - "Enable the extension panel"
+    - "Open any window (e.g. Terminal or Browser) and click Maximize"
+    - "Verify the right edge of the window stops cleanly at the left boundary of the panel"
+regression_risks:
+  - "Struts staying registered after hiding dock in autohide mode (handled by removing chrome or setting affectsStruts dynamically)"
+sources:
+  - "https://gnome.pages.gitlab.gnome.org/gnome-shell/ui/ui/layout.html"
+last_verified: "2026-08-06"

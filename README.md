@@ -27,6 +27,13 @@ for AI agents.
 | Stack | Case | Status |
 |---|---|---|
 | GNOME Shell | [Popup menu switches on hover](cases/gnome-shell/popup-menu-hover-switch/) | Verified |
+| GNOME Shell | [Fullscreen dock autohide on Alt+Tab](cases/gnome-shell/fullscreen-dock-autohide/) | Verified |
+| GNOME Shell | [Maximized window struts reserved space](cases/gnome-shell/window-struts-reserved-space/) | Verified |
+| GNOME Shell | [TopChrome input region click-through](cases/gnome-shell/topchrome-input-region-click-through/) | Verified |
+| GNOME Shell | [Top panel opacity=0 invisible strip](cases/gnome-shell/top-panel-opacity-invisible-strip/) | Verified |
+| GNOME Shell | [Stolen statusArea indicator alignment](cases/gnome-shell/stolen-tray-indicator-alignment/) | Verified |
+| GNOME Shell | [Click-outside PopupMenu dismissal](cases/gnome-shell/click-outside-menu-dismissal/) | Verified |
+| GNOME Shell | [Extension prefs DBus spawn & window focus](cases/gnome-shell/extension-prefs-dbus-spawn-focus/) | Verified |
 
 ## Adding a case
 
