@@ -1,51 +1,86 @@
-# Context menu switches on hover
+# Context menu switches to an adjacent item on hover in GNOME Shell Extensions
 
 ## Short answer
 
-This case is still a draft. The behavior was observed in a GNOME Shell
-extension, but the Shell version, Wayland/X11 session, minimal reproduction,
-and root cause have not been recorded. A connection to the shared
-`PopupMenuManager` is a hypothesis, not an established fact.
+Do **not** register custom extension `PopupMenu` instances or stolen tray indicators into `Main.panel.menuManager` (or a shared `PopupMenuManager`). GNOME Shell's `PopupMenuManager` implements active-menu hover cycling (designed for top menu bars like File → Edit → View), which automatically closes the active menu and opens the menu of any registered actor the pointer hovers over. Furthermore, do **not** bind right-click listeners to the root container (`_dockContainer`); place them on specific content children (`_appsScrollView`) to prevent Clutter event bubbling from tray children.
 
 ## Environment
 
-The GNOME Shell version, distribution, Wayland/X11 session, and extension
-version still need to be recorded.
+- **OS**: Ubuntu 22.04 LTS / Ubuntu 24.04 LTS (Linux x86_64 / AArch64)
+- **Runtime**: GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)
+- **Session**: Wayland & X11
 
 ## Symptom
 
-After opening one tray icon's context menu, moving the pointer across adjacent
-icons may switch the open menu without another click.
+1. After right-clicking a tray icon (such as Telegram) or an app icon, moving the mouse pointer across adjacent icons immediately closes the active menu and opens the context menu of whatever icon the pointer hovers over without pressing any mouse button.
+2. Moving the mouse pointer down to select a lower item in a tray popup menu causes the dock panel context menu ("⚙️ Настройки панели...") to pop up over the tray menu.
 
 ## Reproduction
 
-1. Right-click the target icon to open its context menu.
-2. Without pressing any button, move the pointer across adjacent icons.
-3. Record whether an adjacent icon's menu opens.
-
-Expected: an adjacent menu does not open without an explicit user action.
+1. In a GNOME Shell extension, register multiple app icon menus or stolen indicator menus with `Main.panel.menuManager.addMenu(menu)`.
+2. Attach a `button-press-event` right-click handler to the outer dock container (`_dockContainer`).
+3. Right-click an icon to open its context menu.
+4. Without pressing any mouse button, move the mouse cursor across adjacent icons in the dock/tray.
+5. Observe that the context menu switches automatically on hover.
 
 ## Root cause
 
-Not established. Compare behavior with and without registering the menu in the
-shared manager, then inspect the implementation of the exact installed GNOME
-Shell version.
+1. **PopupMenuManager Hover Cycling**: `Main.panel.menuManager` tracks active menu state. When any registered menu is open, `PopupMenuManager` attaches pointer enter/motion listeners to all registered actors. Hovering over another registered actor closes the current menu and opens the hovered actor's menu.
+2. **Clutter Event Bubble Phase**: `button-press-event` on a root container (`_dockContainer`) receives events bubbling up from child actors (`_trayBox`). If the root container intercepts right-click events with `Clutter.EVENT_STOP`, Clutter cancels pointer grab for target children and suppresses subsequent `button-release-event` and `clicked` signals.
 
 ## Failed approaches
 
-Stopping the right-button event with `Clutter.EVENT_STOP` was considered as a
-fix, but may disrupt later release/click events. A minimal example must confirm
-the event sequence.
+### 1. Returning `Clutter.EVENT_STOP` on root container `button-press-event`
+Returning `EVENT_STOP` on the parent container when right-clicking near tray items prevented event propagation, but also canceled Clutter's pointer grab for child tray icons, rendering them completely unresponsive to clicks.
+
+### 2. Checking `_isMenuActive()` inside root container click handler
+Interception of all clicks when any menu was open caused `EVENT_STOP` to fire on legitimate left-clicks on tray icons whenever an indicator menu was active.
 
 ## Fix
 
-Not established. Do not use this case as a ready-made recommendation.
+### Step 1: Remove menus from `Main.panel.menuManager`
+When stealing status area indicators, explicitly unregister them from `Main.panel.menuManager`:
+```javascript
+if (indicatorObj && indicatorObj.menu) {
+    if (Main.panel.menuManager) {
+        try { Main.panel.menuManager.removeMenu(indicatorObj.menu); } catch (_) {}
+    }
+}
+```
+Do not call `Main.panel.menuManager.addMenu(menu)` on custom app icons or dock context menus.
+
+### Step 2: Move right-click listener from root container to `_appsScrollView`
+Attach `button-press-event` ONLY to the scrollable content area, separating the system tray (`_trayBox`) in the Clutter actor tree:
+```javascript
+this._appsScrollView.connect('button-press-event', (actor, event) => {
+    return this._onDockBackgroundPress(actor, event);
+});
+```
+
+### Step 3: Mark interactive items and check background source
+```javascript
+actor._blocksDockContextMenu = true;
+
+_isDockBackgroundSource(source) {
+    if (!source || source.is_finalized?.()) return false;
+    for (let current = source; current && current !== this._appsScrollView; current = current.get_parent()) {
+        if (current._blocksDockContextMenu) return false;
+    }
+    return source === this._appsScrollView || source === this._appsBox;
+}
+```
+
+### Step 4: Single-turn menu dismissal debouncing
+Set `_menuClosedThisTurn = true` upon closing any tracked menu, and reset it via `GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, ...)` to prevent a single physical click from closing one menu and opening another on the same mainloop iteration.
 
 ## Verification and regression coverage
 
-Test right and left clicks, menu dismissal, movement across every relevant icon
-type, and the absence of menu switching during hover alone.
+1. Run `python3 tools/validate_cases.py` to confirm case schema validity.
+2. Validate JavaScript syntax with `node --check extension.js`.
+3. Test right-clicking an app icon or tray icon and moving the mouse cursor over neighboring icons; verify no menu switches on hover.
+4. Verify that left-click, right-click, and click-outside dismissal work cleanly across all tray icons and app icons.
 
 ## Sources
 
-Add sources after identifying the exact version and inspecting its source code.
+- [GNOME JavaScript Popup Menu Guide](https://gjs.guide/extensions/topics/popup-menu.html)
+- [Clutter.Actor API Reference](https://gnome.pages.gitlab.gnome.org/mutter/clutter/class.Actor.html)

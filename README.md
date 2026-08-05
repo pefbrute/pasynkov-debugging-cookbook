@@ -26,7 +26,7 @@ for AI agents.
 
 | Stack | Case | Status |
 |---|---|---|
-| GNOME Shell | [Popup menu switches on hover](cases/gnome-shell/popup-menu-hover-switch/) | Draft; reproduction required |
+| GNOME Shell | [Popup menu switches on hover](cases/gnome-shell/popup-menu-hover-switch/) | Verified |
 
 ## Adding a case
 
