@@ -1,0 +1,35 @@
+id: gnome-shell-popup-menu-hover-switch
+title: "Context menu switches to an adjacent item on hover"
+status: draft
+stack:
+  - gnome-shell
+  - gjs
+  - clutter
+versions:
+  os: "not recorded"
+  runtime: "GNOME Shell version not recorded"
+  dependencies: {}
+environment:
+  hardware: "not relevant"
+  extra: "Wayland/X11 not recorded"
+symptoms:
+  - "After opening a context menu, moving to an adjacent icon may open its menu without a click"
+expected_behavior: "Another icon's menu opens only after an explicit user action"
+trigger: "Open a context menu and move the pointer across adjacent items"
+root_cause: "Hypothesis: interaction with a shared PopupMenuManager; requires a minimal reproduction and version-specific source evidence"
+failed_approaches:
+  - approach: "Stop the right-button event with EVENT_STOP"
+    result: "Reported to disrupt subsequent release/click handling; reproduction required"
+fix_summary: "not established"
+verification:
+  automated: false
+  command: ""
+  manual_steps:
+    - "Test a right click on the target icon"
+    - "Move the pointer across adjacent icons"
+    - "Test a normal left click and menu dismissal"
+regression_risks:
+  - "Lost button-release/click handling"
+  - "A menu that does not close"
+sources: []
+last_verified: null

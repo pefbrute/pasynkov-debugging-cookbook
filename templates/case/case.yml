@@ -1,0 +1,26 @@
+id: stack-short-symptom
+title: "Short title describing the observable failure"
+status: draft
+stack:
+  - technology
+versions:
+  os: "unknown"
+  runtime: "unknown"
+  dependencies: {}
+environment:
+  hardware: "not relevant"
+  extra: ""
+symptoms:
+  - "What the user actually observes"
+expected_behavior: "What should happen instead"
+trigger: "Minimal conditions that trigger the failure"
+root_cause: "unknown"
+failed_approaches: []
+fix_summary: "not established"
+verification:
+  automated: false
+  command: ""
+  manual_steps: []
+regression_risks: []
+sources: []
+last_verified: null
