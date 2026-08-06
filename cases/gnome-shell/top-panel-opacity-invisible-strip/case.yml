@@ -33,4 +33,10 @@ regression_risks:
   - "Failing to call Main.panel.show() in disable(), leaving user without top panel"
 sources:
   - "https://gnome.pages.gitlab.gnome.org/mutter/clutter/class.Actor.html"
+upstream:
+  project: "GNOME/gjs-guide"
+  issue: null
+  merge_request: null
+  status: not-submitted
 last_verified: "2026-08-06"
+

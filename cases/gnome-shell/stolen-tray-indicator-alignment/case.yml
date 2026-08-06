@@ -33,4 +33,10 @@ regression_risks:
   - "Indicator signals breaking upon return to top panel"
 sources:
   - "https://gjs.guide/extensions/topics/panel-menu-button.html"
+upstream:
+  project: "GNOME/gjs-guide"
+  issue: null
+  merge_request: null
+  status: not-submitted
 last_verified: "2026-08-06"
+

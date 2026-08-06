@@ -35,4 +35,10 @@ regression_risks:
   - "Failing to match window wm_class or title"
 sources:
   - "https://gjs.guide/extensions/topics/preferences.html"
+upstream:
+  project: "GNOME/gjs-guide"
+  issue: null
+  merge_request: null
+  status: not-submitted
 last_verified: "2026-08-06"
+

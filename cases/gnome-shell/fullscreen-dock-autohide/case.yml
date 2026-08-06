@@ -39,4 +39,10 @@ regression_risks:
   - "Pressure barriers failing to re-initialize after exiting fullscreen"
 sources:
   - "https://gnome.pages.gitlab.gnome.org/mutter/meta/class.Display.html"
+upstream:
+  project: "GNOME/gnome-shell"
+  issue: null
+  merge_request: null
+  status: not-submitted
 last_verified: "2026-08-06"
+

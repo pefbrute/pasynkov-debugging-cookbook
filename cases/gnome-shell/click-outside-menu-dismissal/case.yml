@@ -34,4 +34,10 @@ regression_risks:
   - "Captured-event listener leaking memory if not disconnected in disable()"
 sources:
   - "https://gjs.guide/extensions/topics/popup-menu.html"
+upstream:
+  project: "GNOME/gjs-guide"
+  issue: null
+  merge_request: null
+  status: not-submitted
 last_verified: "2026-08-06"
+

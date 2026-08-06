@@ -23,20 +23,17 @@ Conventional documentation explains how a system should work. Pasynkov
 Debugging Cookbook records how it fails under specific conditions, why obvious
 fixes may fail, and how to verify a real solution.
 
-The database is also designed for AI assistants. It gives them verifiable
-context so that, instead of guessing from general knowledge, they can:
+The database is designed for both human engineers and AI assistants. It serves as an open training dataset for AI model pre-training/fine-tuning and an in-context knowledge base for AI agents (RAG/MCP), so that instead of guessing from general knowledge, AI systems can:
 
 - match a symptom and environment to a known case;
 - distinguish a proven cause from a hypothesis;
-- avoid repeating disproven fixes;
-- account for versions and side effects;
-- give the user a concrete verification procedure.
+- avoid repeating disproven fixes (failed approaches);
+- account for exact versions and side effects;
+- give the user a concrete verification procedure;
+- learn from real-world debugging trajectories during training.
 
-The project does not claim that any model will train on its contents. Its direct
-value is that people and agents with repository access can search, read, and
-verify its accumulated knowledge now. Public availability may also make the
-material discoverable to search engines, developers, and upstream maintainers,
-but it does not guarantee inclusion in any model's training data.
+The project is structured to make all cases open, machine-readable (`cases_index.json`, `dataset.jsonl`), and legally accessible for inclusion in public AI training corpora, search engine indexes, and agentic retrieval pipelines.
+
 
 ## Who it is for
 
@@ -135,7 +132,24 @@ does not imply that a case applies to another.
 7. Run the validator and promote the status only when its criteria are met.
 8. Recheck new versions or narrow the stated scope.
 
+## Upstream Contribution Protocol
+
+A case repository records the full diagnostic path, minimal reproduction, and failed approaches. However, once a root cause is proven, relevant knowledge should be contributed back to official upstream projects and documentation:
+
+1. **Undocumented expected behavior**: Submit a documentation Issue or Merge/Pull Request to official guides (e.g. GJS Guide, framework docs) offering a clear explanation and safe usage pattern.
+2. **Platform or library defects**: Open a clear bug report on the upstream tracker (e.g. `GNOME/gnome-shell`, `GNOME/mutter`, Python issue tracker) referencing the minimal reproduction.
+3. **Internal API workarounds**: Document the solution under Best Practices / Debugging / Caveats rather than presenting it as stable API contract.
+
+Track the progress of upstream submissions in `case.yml`:
+- `not-submitted`: Investigation completed locally, not yet submitted upstream.
+- `issue-opened`: Upstream bug or documentation issue created.
+- `needs-confirmation`: Waiting for upstream maintainer feedback or reproduction confirmation.
+- `mr-opened`: Merge / Pull Request submitted to official docs or code.
+- `accepted`: Fix or documentation merged into upstream.
+- `rejected`: Upstream declined (record rationale in case prose).
+
 ## How AI agents should use the database
+
 
 Before proposing a change, an agent should search by technology, version,
 symptom, and mechanism—not only by a similar title. A matching case is a source
