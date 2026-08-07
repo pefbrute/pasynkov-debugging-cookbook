@@ -1,0 +1,53 @@
+#!/bin/bash
+# Pre-commit hook for pasynkov-debugging-cookbook
+# Blocks commits if lint_article.py finds ERRORs in modified articles
+#
+# Install: cp .git/hooks/pre-commit.sample .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Or run: bash tools/install_hooks.sh
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+LINT_SCRIPT="$REPO_ROOT/tools/lint_article.py"
+
+if [ ! -f "$LINT_SCRIPT" ]; then
+    echo "lint_article.py not found — skipping article lint"
+    exit 0
+fi
+
+# Find modified/added .md files in cases/
+CHANGED_MD=$(git diff --cached --name-only --diff-filter=ACM | grep '^cases/.*\.md$' || true)
+
+if [ -z "$CHANGED_MD" ]; then
+    exit 0
+fi
+
+echo "🔍 Linting articles..."
+FAIL=0
+
+for f in $CHANGED_MD; do
+    FULL="$REPO_ROOT/$f"
+    if [ -f "$FULL" ]; then
+        OUTPUT=$(python3 "$LINT_SCRIPT" "$FULL" 2>&1)
+        if echo "$OUTPUT" | grep -q "^ERROR"; then
+            echo ""
+            echo "❌ Lint errors in $f:"
+            echo "$OUTPUT"
+            FAIL=1
+        elif [ -n "$OUTPUT" ]; then
+            echo "⚠️  Warnings in $f (commit allowed):"
+            echo "$OUTPUT"
+        fi
+    fi
+done
+
+if [ "$FAIL" -eq 1 ]; then
+    echo ""
+    echo "❌ Commit blocked: fix ERROR items above before committing."
+    echo "   Run: python3 tools/lint_article.py <file> to see details"
+    echo "   Add ILLUSTRATIVE marker to code examples or explain log tokens."
+    exit 1
+fi
+
+echo "✅ Article lint passed"
+exit 0

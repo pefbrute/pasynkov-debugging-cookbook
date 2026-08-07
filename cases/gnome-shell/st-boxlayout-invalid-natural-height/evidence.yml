@@ -1,0 +1,71 @@
+case_id: "gnome-shell/st-boxlayout-invalid-natural-height"
+
+# --- API Contract Claims ---
+api_contracts:
+  - statement: "for_width parameter is gfloat; min_height_p and natural_height_p are gfloat*"
+    source_url: https://gnome.pages.gitlab.gnome.org/mutter/clutter/method.Actor.get_preferred_height.html
+    confidence: CONFIRMED
+    declaration: "void clutter_actor_get_preferred_height(ClutterActor* self, gfloat for_width, gfloat* min_height_p, gfloat* natural_height_p)"
+    notes: ""
+
+  - statement: "A negative for_width value means no width is defined (unconstrained query)"
+    source_url: https://gnome.pages.gitlab.gnome.org/mutter/clutter/method.Actor.get_preferred_height.html
+    confidence: CONFIRMED
+    declaration: "for_width: Available width to assume in computing desired height, or a negative value to indicate that no width is defined."
+    notes: ""
+
+  - statement: "for_width = 0 is a formally defined zero-pixel width, not an unconstrained query"
+    source_url: https://gnome.pages.gitlab.gnome.org/mutter/clutter/method.Actor.get_preferred_height.html
+    confidence: CONFIRMED
+    declaration: null
+    notes: "Follows from the negative-means-unconstrained contract: zero is a valid non-negative value and is treated as a real zero-pixel width constraint."
+
+  - statement: "If an actor has no valid allocation, get_width() returns the actor's natural width"
+    source_url: https://mutter.gnome.org/clutter/method.Actor.get_width.html
+    confidence: CONFIRMED
+    declaration: "gfloat clutter_actor_get_width(ClutterActor* self) — If the actor does not have a valid allocation, this function will return the actor's natural width"
+    notes: ""
+
+  - statement: "St.ScrollView is a single-child container for actors implementing StScrollable"
+    source_url: https://gnome.pages.gitlab.gnome.org/gnome-shell/st/class.ScrollView.html
+    confidence: CONFIRMED
+    declaration: null
+    notes: ""
+
+# --- Type / Marshaling Claims ---
+type_claims:
+  - statement: "The large anomalous value visible in logs when a negative height is returned from GJS does NOT arise from guint marshaling"
+    declaration: "gfloat* natural_height_p — output type is gfloat*, not guint*"
+    source_url: https://gnome.pages.gitlab.gnome.org/mutter/clutter/method.Actor.get_preferred_height.html
+    confidence: CONFIRMED
+
+# --- Log Token Registry ---
+# Every token that appears in a log block must be listed here.
+log_tokens:
+  - token: "natH"
+    example_value: "<large anomalous value observed in this case>"
+    explanation: "The natural height returned by ChildGridActor.vfunc_get_preferred_height when forWidth is negative and no guard is present. The exact large value depends on how the negative JS return is processed by the GJS->C boundary — not confirmed from source."
+    source: live-pass
+
+  - token: "status"
+    example_value: "4294967040 (observed in early debug session)"
+    explanation: "Origin of this specific value is unknown. It appeared in early debug output but was never traced to its source. Not referenced in any verified causal chain."
+    source: null
+
+# --- Causal Claims ---
+causal_claims:
+  - statement: "Setting x_expand: true changes the preferred-size query path so that a positive forWidth is passed"
+    confidence: OBSERVED
+    scope: "this specific actor hierarchy"
+    evidence_ref: "Live-pass log: [Preferred-size pass] ChildGridActor.vfunc_get_preferred_height(forWidth=280)"
+
+  - statement: "ClutterBoxLayout passes negative for_width to non-expanding aligned children"
+    confidence: OBSERVED
+    scope: "this specific actor hierarchy"
+    evidence_ref: "Live-pass log: [Preferred-size pass] ChildGridActor.vfunc_get_preferred_height(forWidth=-1)"
+
+  - statement: "Negative JS return value from vfunc_get_preferred_height causes anomalously large natH via guint cast"
+    confidence: UNKNOWN
+    scope: null
+    evidence_ref: null
+    notes: "gfloat* signature confirmed — guint cast hypothesis is incorrect. Actual mechanism unknown."

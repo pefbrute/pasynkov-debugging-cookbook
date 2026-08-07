@@ -133,4 +133,4 @@ StBoxLayout (parent): minH=0, natH=340, allocH=600
 
 ### Conclusion
 
-The preferred-size implementation must always return finite, non-negative values and compute a valid column count for both constrained and unconstrained queries. Use intrinsic component sizing for the unconstrained case rather than querying an unallocated parent.
+The preferred-size implementation must return finite, non-negative values and compute a valid column count for both constrained and unconstrained queries. Use intrinsic component sizing for the unconstrained case rather than querying an unallocated parent.

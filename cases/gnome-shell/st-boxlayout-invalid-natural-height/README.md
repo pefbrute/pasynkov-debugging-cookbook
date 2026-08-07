@@ -7,7 +7,6 @@ App launcher icons or custom extension grid items are instantiated, but remain c
 ```text
 appsScroll=1
 appsBox=1
-status=4294967040
 ```
 
 Even though children exist and report positive dimensions, the parent `St.ScrollView` refuses to allocate vertical space inside a vertical `St.BoxLayout`.

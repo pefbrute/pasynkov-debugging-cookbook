@@ -26,4 +26,40 @@ the protocol for AI agents. Then read the specific case's `README.md` and
 - [Rule 12] When a code example uses a framework or stdlib class, verify the usage requirements (not just the method API). A child of St.ScrollView must implement StScrollable — this does not surface from syntax review alone.
 - Unified principle: every number, type, and causal claim in the text must have a source — either a live-pass log from your own experiment, or official documentation. If no source exists, the claim either does not appear in the text or carries an explicit disclaimer.
 
+## Mandatory Article-Writing Workflow
+
+Before writing any article prose for a new case, follow this order:
+
+1. **Fill `evidence.yml` first** (copy from `templates/evidence.yml`):
+   - Classify every claim: CONFIRMED | HYPOTHESIS | UNKNOWN
+   - Run `python3 tools/fetch_api_docs.py <function>` for each type/API claim
+   - Every log token that will appear in the article must be listed with an explanation
+   - Do not start writing prose until all claims have a source_url or are marked UNKNOWN
+
+2. **Use `templates/case_article.md`** as starting point for the article:
+   - Every `<!-- SOURCE: -->` placeholder must be filled or removed
+   - Every `<!-- OBSERVED | HYPOTHESIS | UNKNOWN -->` marker must be applied
+   - Illustrative code blocks must contain `// ILLUSTRATIVE EXAMPLE` comment
+
+3. **Run lint before committing**:
+   ```
+   python3 tools/lint_article.py cases/<id>/
+   ```
+   Fix all ERRORs. Warnings are advisory.
+
+4. **Install the pre-commit hook** (once per clone):
+   ```
+   python3 tools/install_hooks.py
+   ```
+   The hook runs lint_article.py automatically on every `git commit`.
+
+## Toolchain Reference
+
+| Tool | Purpose | When to use |
+|------|---------|-------------|
+| `tools/fetch_api_docs.py <fn>` | Fetch C declaration + description for any Clutter/St/GJS API | Before writing any type or contract claim |
+| `tools/lint_article.py <file>` | Check article for accuracy violations | Before every commit |
+| `tools/install_hooks.py` | Install pre-commit git hook | Once per clone |
+| `templates/evidence.yml` | Machine-readable facts table template | Before writing any article |
+| `templates/case_article.md` | Article structure template | When starting a new article |
 

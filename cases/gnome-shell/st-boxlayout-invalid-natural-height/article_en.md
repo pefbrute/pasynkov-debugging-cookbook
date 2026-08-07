@@ -221,4 +221,4 @@ bash cases/gnome-shell/st-boxlayout-invalid-natural-height/verify.sh
 
 An `St.ScrollView` 1px collapse occurs when a custom child actor returns a negative or otherwise invalid height under unconstrained queries (negative `forWidth`), which results in an anomalously large value visible in logs.
 
-A complete resolution ensures that `vfunc_get_preferred_height` always returns finite, non-negative values and computes a valid column count for both constrained and unconstrained queries — using intrinsic component sizing for the unconstrained case rather than querying an unallocated parent.
+A complete resolution ensures that `vfunc_get_preferred_height` returns finite, non-negative values and computes a valid column count for both constrained and unconstrained queries — using intrinsic component sizing for the unconstrained case rather than querying an unallocated parent.

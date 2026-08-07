@@ -1,0 +1,37 @@
+# evidence.yml — Machine-readable facts table for this case.
+# Fill this file BEFORE writing any article prose.
+# Every claim in the article must map to a claim here.
+# confidence: CONFIRMED | HYPOTHESIS | UNKNOWN
+# source_url: official docs URL or null
+# log_source: 'live-pass' | 'manual-call' | 'illustrative' | null
+
+case_id: "" # must match case.yml id
+
+# --- API Contract Claims ---
+api_contracts:
+  - statement: ""
+    source_url: null
+    confidence: UNKNOWN # CONFIRMED | HYPOTHESIS | UNKNOWN
+    notes: ""
+
+# --- Type / Marshaling Claims ---
+type_claims:
+  - statement: ""
+    declaration: "" # paste exact C declaration here
+    source_url: null
+    confidence: UNKNOWN
+
+# --- Log Token Registry ---
+# Every token that appears in a log block must be listed here.
+log_tokens:
+  - token: "" # e.g. "natH"
+    example_value: "" # e.g. "4294967296"
+    explanation: "" # where does this number come from?
+    source: null # 'live-pass' | 'illustrative' | 'manual-call'
+
+# --- Causal Claims ---
+causal_claims:
+  - statement: "" # e.g. "x_expand causes Clutter to pass container width"
+    confidence: UNKNOWN # CONFIRMED (has log evidence) | HYPOTHESIS | OBSERVED (specific hierarchy only)
+    scope: "" # 'general' | 'this specific hierarchy' | 'illustrative'
+    evidence_ref: null # link to log or doc
