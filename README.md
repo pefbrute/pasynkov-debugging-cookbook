@@ -42,7 +42,7 @@ Run `python3 tools/build_dataset.py` to regenerate these dataset artifacts.
 | GNOME Shell | [Dock extension fails to hide or stays visible over fullscreen games during Alt+Tab](cases/gnome-shell/fullscreen-dock-autohide/) | Verified |
 | GNOME Shell | [Context menu switches to adjacent items on hover due to shared PopupMenuManager](cases/gnome-shell/popup-menu-hover-switch/) | Verified |
 | GNOME Shell | [Mouse wheel scrolling blocked by child actor event interception and visible StScrollBar](cases/gnome-shell/scroll-event-interception/) | Verified |
-| GNOME Shell | [GNOME Shell St.BoxLayout returns invalid natural height 4294967296 and collapses St.ScrollView to 1px](cases/gnome-shell/st-boxlayout-invalid-natural-height/) | Verified |
+| GNOME Shell | [Fixing a GNOME Shell St.ScrollView 1px layout collapse under unconstrained sizing queries](cases/gnome-shell/st-boxlayout-invalid-natural-height/) | Verified |
 | GNOME Shell | [Stolen statusArea indicators distorted or misaligned in custom grid](cases/gnome-shell/stolen-tray-indicator-alignment/) | Verified |
 | GNOME Shell | [Hiding top panel with opacity=0 leaves an invisible top dead zone](cases/gnome-shell/top-panel-opacity-invisible-strip/) | Verified |
 | GNOME Shell | [Custom popup or window preview is visible but mouse clicks pass through to underlying windows](cases/gnome-shell/topchrome-input-region-click-through/) | Verified |

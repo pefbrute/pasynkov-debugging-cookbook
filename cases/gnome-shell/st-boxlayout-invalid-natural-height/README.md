@@ -1,10 +1,10 @@
-# GNOME Shell St.BoxLayout Invalid Natural Height 4294967296 Collapses St.ScrollView to 1px
+# GNOME Shell St.ScrollView Collapse Caused by Invalid Natural Height 4294967296
 
 ## Symptom
 
 App launcher icons or custom extension grid items are instantiated, but remain completely invisible on screen. Inspecting actor geometry via debug logs reveals that the `St.ScrollView` container has collapsed to a height of 1px:
 
-```
+```text
 appsScroll=1
 appsBox=1
 status=4294967040
@@ -14,15 +14,16 @@ Even though children exist and report positive dimensions, the parent `St.Scroll
 
 ## Environment
 
-- **OS**: Ubuntu 22.04 / 24.04 LTS (Linux x86_64 / AArch64)
-- **Runtime**: GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)
+- **OS**: Ubuntu 22.04.5 LTS (Linux x86_64)
+- **Runtime**: GNOME Shell 42.9 (GJS 1.72.4)
+- **Dependencies**: Mutter >= 42.0
 - **Display Server**: Wayland & X11
 
 ## Diagnostic Path
 
 To locate the failing actor in the Clutter hierarchy:
 
-1. Traverse the actor tree recursively and print `get_preferred_height(-1)` and `get_allocation_box()` for every container:
+1. Traverse the actor tree recursively and print `get_preferred_height(-1)` (where `-1` specifies an unconstrained width query) and `get_allocation_box()` for every container:
 
 ```javascript
 function inspectActorTree(actor, depth = 0) {
@@ -35,26 +36,35 @@ function inspectActorTree(actor, depth = 0) {
 }
 ```
 
-2. The output reveals an integer overflow sentinel:
+2. The output reveals an unconstrained layout value near the $2^{32}$ boundary:
    - `ChildGridActor`: `minH=0`, `natH=4294967296`
    - `StScrollView`: `minH=1`, `natH=4294967296`, `allocH=1`
 
-## Root Cause Analysis
+## Working Hypothesis & Mathematical Evidence
 
-In Clutter / St C library implementation, `-1` is used as an unconstrained or default size sentinel in preferred size queries.
+The observed failure is real: a child actor reported an enormous preferred height near the 32-bit unsigned boundary ($2^{32} = 4,294,967,296$), after which `St.ScrollView` received only a 1px allocation.
 
-When a custom child actor or CSS alignment rule creates an unconstrained layout state (e.g. conflicting `x_align`/`y_align` parameters combined with missing `min-width`/`min-height`), `get_preferred_height()` returns `-1` for `naturalHeight`.
+### 1. The $-1$ Unconstrained Query Parameter
+In `get_preferred_height(-1)`, `-1` is the input parameter `for_width`, representing an unconstrained width query in Clutter (`clutter_actor_get_preferred_height`). One working hypothesis is that an unconstrained or sentinel preferred size entered the layout calculation when intermediate containers lacked explicit minimum dimensions or had conflicting `x_align`/`y_align` flags.
 
-When this value is cast or stored as an unsigned 32-bit integer (`uint32`) inside Clutter's layout calculation struct, `-1` wraps to:
+### 2. Floating-Point (`gfloat`) Precision at $2^{32}$
+In Clutter and Mutter C layout implementations (`clutter/clutter-box-layout.c`), layout sizes are calculated using `gfloat` (32-bit IEEE 754 single-precision floating point numbers).
 
-$$\text{uint32}(-1) = 2^{32} - 1 = 4,294,967,295 \approx 4,294,967,296$$
+Near $2^{32}$, single-precision floats lose unit precision:
+- $2^{32} = 4,294,967,296$
+- $2^{32} - 256 = 4,294,967,040$
 
-During vertical allocation in `St.BoxLayout`, the algorithm sums natural heights across siblings to allocate proportional space. Seeing an astronomical natural height of $4,294,967,296\text{ px}$, `St.BoxLayout` determines that constraints cannot be satisfied, falls back to minimum height requirements, and collapses `St.ScrollView` to `1px`.
+The values observed in logs ($4,294,967,296$ and $4,294,967,040$) match representable values in `gfloat` arithmetic for numbers near the $2^{32}$ limit.
+
+> **Note on Root Cause Boundaries**: The exact integer-to-unsigned/float conversion point in Mutter or St has not yet been isolated to a specific line in C source. The arithmetic alignment near $2^{32}$ remains a working hypothesis based on empirical logs.
+
+### 3. Container Allocation Fallback
+When vertical `ClutterBoxLayout` sums natural heights across siblings, an astronomical value near $4\,294\,967\,296\text{ px}$ causes proportional space allocation to fail. Clutter triggers a fallback, granting `St.ScrollView` its minimum requirement — **1px**.
 
 ## Failed Approaches
 
 - **Setting `y_align: Clutter.ActorAlign.FILL` without `min-height`**:
-  *Result*: Does not prevent the child from returning `-1` sentinel natural height under unconstrained layout queries.
+  *Result*: Does not prevent the child from returning an unconstrained preferred size.
 - **Calling `actor.queue_relayout()` during construction**:
   *Result*: Triggers a layout cycle while GObject properties are partially initialized, leading to empty `AppFavorites` grid race conditions on GNOME startup.
 - **Multiple Geometry Owners**:
@@ -62,35 +72,42 @@ During vertical allocation in `St.BoxLayout`, the algorithm sums natural heights
 
 ## Correct Solution
 
-1. **Remove conflicting alignment flags**: Keep `x_align` and `y_align` consistent across parent and child containers.
-2. **Specify explicit `min-width` and `min-height`**: Ensure every custom grid or child container returns a non-negative minimum height.
-3. **Avoid construct-time relayout**: Never call `queue_relayout()` inside `_init()` or constructors.
-4. **Reset preferred size safely**: Use `set_height(-1)` only when clearing explicit overrides.
-5. **Single Geometry Owner**: Maintain one primary owner for actor dimensions.
+1. **Single Geometry Owner**: Manage dimensions and expansion in one location (JS via Clutter actor flags).
+2. **Align Container Constraints**: Remove conflicting `x_align` and `y_align` parameters from intermediate wrappers.
+3. **Use Expansion Flags**: Use `x_expand: true` and `y_expand: true` so the parent layout manager handles dynamic resizing.
 
-### Minimal Diff
+### Diagnostic Workaround vs Adaptive Solution
 
+As a diagnostic workaround to confirm preferred size behavior, setting explicit bounds restores allocation:
+```javascript
+grid.set_size(200, 300); // Workaround for testing size constraints
+```
+
+For the adaptive production fix:
 ```diff
-- const grid = new St.Widget({ x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.FILL });
+- const grid = new St.Widget({ 
+-     x_align: Clutter.ActorAlign.CENTER, 
+-     y_align: Clutter.ActorAlign.FILL 
+- });
 - grid.queue_relayout();
+
 + const grid = new St.Widget({
 +     style_class: 'app-grid',
 +     x_expand: true,
 +     y_expand: true,
 + });
-+ grid.set_size(200, 300);
 ```
 
-## Related Edge Cases
+## Illustrative Layout Structure
 
-1. **Empty `AppFavorites` on Startup**: `AppSystem` may not be initialized when extension loads; defer grid population to `app-state-changed` signal.
-2. **Disposed `DockAppIcon` References**: Avoid retaining JS references to actors that GNOME Shell has destroyed.
+The snippet in `reproduction/` provides an illustrative layout structure demonstrating container hierarchy rather than a standalone containerized GNOME Shell process.
 
 ## Verification
 
-Run the verification script:
-```bash
-bash cases/gnome-shell/st-boxlayout-invalid-natural-height/verify.sh
-```
+### 1. Repository Validation
+Run `bash verify.sh` to check JS syntax across `reproduction/`, `broken/`, and `fixed/`, verify file structure, and run `tools/validate_cases.py`.
 
-Verify that `appsScroll` allocation height is $> 100\text{px}$ and `naturalHeight` is non-negative and $< 4294967296$.
+### 2. Runtime Verification in GNOME Shell
+1. Install and enable the extension in a GNOME Shell 42.9 session.
+2. Open the side panel or dock containing `St.ScrollView`.
+3. Confirm `appsScroll` allocation height is $> 100\text{px}$ and icons render properly.

@@ -1,5 +1,5 @@
 id: gnome-shell-st-boxlayout-invalid-natural-height
-title: "GNOME Shell St.BoxLayout returns invalid natural height 4294967296 and collapses St.ScrollView to 1px"
+title: "Fixing a GNOME Shell St.ScrollView 1px layout collapse under unconstrained sizing queries"
 status: verified
 stack:
   - gnome-shell
@@ -15,12 +15,14 @@ environment:
   hardware: "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics"
   extra: "Wayland and X11 GNOME Shell 42.9 Sessions"
 symptoms:
-  - "St.ScrollView inside a vertical St.BoxLayout collapses to 1px height when child grid layout returns naturalHeight = 4294967296"
+  - "St.ScrollView inside a vertical St.BoxLayout collapses to 1px height under unconstrained layout queries"
   - "App launcher or icon grid is created but invisible on screen despite appsScroll=1, appsBox=1, status=4294967040 in debug logs"
-  - "get_preferred_height() returns naturalHeight = 4294967296 (uint32 sentinel for -1) breaking container height allocation math"
+  - "get_preferred_height(-1) returns oversized natural height query breaking container height allocation math"
 expected_behavior: "St.ScrollView expands smoothly within the vertical St.BoxLayout according to available container space, displaying icon grids correctly without collapsing to 1px"
 trigger: "Add a custom grid layout container inside a St.ScrollView within a vertical St.BoxLayout, where a child actor has conflicting alignment, missing min-size, or calls queue_relayout during construction"
-root_cause: "Child layout actor returns an unconstrained preferred height sentinel (-1), which when stored or converted to unsigned 32-bit integer (uint32) in Clutter/St C layout math becomes 4294967296 (2^32). When vertical St.BoxLayout calculates natural height allocations across siblings, this overflowed value forces St.ScrollView to allocate 1px minimum height instead of remaining available vertical space."
+root_cause: "Unconstrained preferred height queries (for_width = -1) under conflicting child alignment flags cause layout allocation calculation failures. Values logged near 2^32 match float32 precision step bounds (ULP = 256). Setting explicit x_expand/y_expand flags and eliminating conflicting container alignment restores proper adaptive layout allocation."
+
+
 failed_approaches:
   - approach: "Setting arbitrary min-height in CSS without resolving alignment conflicts"
     result: "ScrollView stays fixed size or clips content without responding dynamically to panel size changes"
