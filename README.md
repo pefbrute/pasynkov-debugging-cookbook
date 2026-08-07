@@ -36,15 +36,10 @@ Run `python3 tools/build_dataset.py` to regenerate these dataset artifacts.
 <!-- CASE_CATALOG_START -->
 | Stack | Case | Status |
 |---|---|---|
-| GNOME Shell | [Autohide dock panel stuck hidden off-screen or fails to slide out on hover](cases/gnome-shell/autohide-state-lock/) | Verified |
 | GNOME Shell | [Custom PopupMenu stays open when clicking outside on desktop or workspace](cases/gnome-shell/click-outside-menu-dismissal/) | Verified |
-| GNOME Shell | [GJS throws fatal error accessing already disposed C/Clutter objects](cases/gnome-shell/disposed-gobject-access-crash/) | Verified |
 | GNOME Shell | [Extension preferences window fails to open or doesn't raise to front on repeated click](cases/gnome-shell/extension-prefs-dbus-spawn-focus/) | Verified |
-| GNOME Shell | [Dock wipes favorite app icons during transient AppFavorites unreadiness or custom .desktop ID lookup](cases/gnome-shell/favorites-transient-wipe/) | Verified |
 | GNOME Shell | [Dock extension fails to hide or stays visible over fullscreen games during Alt+Tab](cases/gnome-shell/fullscreen-dock-autohide/) | Verified |
-| GNOME Shell | [Truncating app or window title causes Pango markup syntax exception in St.Label](cases/gnome-shell/pango-markup-truncation-crash/) | Verified |
 | GNOME Shell | [Context menu switches to adjacent items on hover due to shared PopupMenuManager](cases/gnome-shell/popup-menu-hover-switch/) | Verified |
-| GNOME Shell | [Mouse wheel scrolling blocked by child actor event interception and visible StScrollBar](cases/gnome-shell/scroll-event-interception/) | Verified |
 | GNOME Shell | [GNOME Shell St.BoxLayout returns invalid natural height 4294967296 and collapses St.ScrollView to 1px](cases/gnome-shell/st-boxlayout-invalid-natural-height/) | Verified |
 | GNOME Shell | [Stolen statusArea indicators distorted or misaligned in custom grid](cases/gnome-shell/stolen-tray-indicator-alignment/) | Verified |
 | GNOME Shell | [Hiding top panel with opacity=0 leaves an invisible top dead zone](cases/gnome-shell/top-panel-opacity-invisible-strip/) | Verified |
