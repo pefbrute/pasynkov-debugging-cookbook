@@ -58,6 +58,64 @@
     "rel_path": "cases/gnome-shell/click-outside-menu-dismissal"
   },
   {
+    "id": "gnome-shell-dock-background-context-menu",
+    "title": "Cluttered top control button stack and missing native dock background right-click context menu",
+    "status": "verified",
+    "stack": [
+      "gnome-shell",
+      "gjs",
+      "clutter",
+      "st"
+    ],
+    "versions": {
+      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
+      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)",
+      "dependencies": {
+        "mutter": ">= 42.0"
+      }
+    },
+    "environment": {
+      "hardware": "Any GPU",
+      "extra": "Wayland and X11 GNOME Shell Sessions"
+    },
+    "symptoms": [
+      "Top of panel is crowded with multiple control buttons, reducing vertical space for app icons",
+      "Right-clicking dock background or empty space does not show panel context menu"
+    ],
+    "expected_behavior": "Top of panel retains 1 App Grid button, navigation is consolidated in status area, and right-clicking dock background opens a native PopupMenu",
+    "trigger": "Right click empty dock background or panel separators",
+    "root_cause": "Stacking 3 control buttons at top of panel wastes vertical real estate. Lacking a button-press-event (button 3) listener on container actors prevents native background context menu invocation.",
+    "failed_approaches": [
+      {
+        "approach": "Adding right click handler to root container without filtering child events",
+        "result": "Intercepts clicks meant for child tray icons or app icon context menus"
+      }
+    ],
+    "fix_summary": "Keep 1 App Grid button at top, move Workspaces and Settings to status area, attach button 3 right-click listener to _appsScrollView using _isDockBackgroundSource check, and trigger native PopupMenu.PopupMenu.",
+    "verification": {
+      "automated": true,
+      "command": "node --check right-dock@pasynkov/extension.js",
+      "manual_steps": [
+        "Right click background area of dock panel",
+        "Verify PopupMenu opens with Settings, Workspaces, and App Grid options"
+      ]
+    },
+    "regression_risks": [
+      "Interference with child icon right-click context menus"
+    ],
+    "sources": [
+      "https://gjs.guide/extensions/topics/popup-menu.html"
+    ],
+    "upstream": {
+      "project": "GNOME/gjs-guide",
+      "issue": null,
+      "merge_request": null,
+      "status": "not-submitted"
+    },
+    "last_verified": "2026-08-07",
+    "rel_path": "cases/gnome-shell/dock-background-context-menu"
+  },
+  {
     "id": "gnome-shell-extension-prefs-dbus-spawn-focus",
     "title": "Extension preferences window fails to open or doesn't raise to front on repeated click",
     "status": "verified",
@@ -245,6 +303,65 @@
     },
     "last_verified": "2026-08-06",
     "rel_path": "cases/gnome-shell/popup-menu-hover-switch"
+  },
+  {
+    "id": "gnome-shell-scroll-event-interception",
+    "title": "Mouse wheel scrolling blocked by child actor event interception and visible StScrollBar",
+    "status": "verified",
+    "stack": [
+      "gnome-shell",
+      "gjs",
+      "st",
+      "clutter"
+    ],
+    "versions": {
+      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
+      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, St, Clutter)",
+      "dependencies": {
+        "mutter": ">= 42.0"
+      }
+    },
+    "environment": {
+      "hardware": "Any GPU",
+      "extra": "Wayland and X11 GNOME Shell Sessions"
+    },
+    "symptoms": [
+      "Mouse wheel scrolling over application icons inside St.ScrollView is ignored or blocked",
+      "Default StScrollBar renders a wide, unwanted visible scrollbar over dock content"
+    ],
+    "expected_behavior": "St.ScrollView scrolls smoothly when wheeling over child actors, while scrollbar is styled completely invisible",
+    "trigger": "Scroll mouse wheel while hovering application icon actors inside St.ScrollView",
+    "root_cause": "Child actors (DockAppIcon) intercept scroll-event and return Clutter.EVENT_STOP to cycle active windows, stopping scroll events from bubbling to St.ScrollView. Default StScrollBar lacks zero-width CSS rules.",
+    "failed_approaches": [
+      {
+        "approach": "Returning Clutter.EVENT_STOP on child icon scroll-event without modifier check",
+        "result": "Intercepts all mouse wheel events and prevents St.ScrollView from receiving scroll events"
+      }
+    ],
+    "fix_summary": "Return Clutter.EVENT_PROPAGATE for standard mouse wheel scrolling on child icon actors (reserving window cycling for Shift + Scroll), attach scroll-event handler to St.ScrollView (vscrollbar_policy: AUTOMATIC), and enforce width: 0px !important; opacity: 0 !important; in CSS.",
+    "verification": {
+      "automated": true,
+      "command": "node --check right-dock@pasynkov/appIcon.js",
+      "manual_steps": [
+        "Hover over application icon grid in panel",
+        "Scroll mouse wheel up and down",
+        "Verify panel scrolls smoothly and scrollbar is invisible"
+      ]
+    },
+    "regression_risks": [
+      "Shift+Scroll window cycling conflicting with scroll direction"
+    ],
+    "sources": [
+      "https://gnome.pages.gitlab.gnome.org/mutter/clutter/class.Actor.html"
+    ],
+    "upstream": {
+      "project": "GNOME/gjs-guide",
+      "issue": null,
+      "merge_request": null,
+      "status": "not-submitted"
+    },
+    "last_verified": "2026-08-07",
+    "rel_path": "cases/gnome-shell/scroll-event-interception"
   },
   {
     "id": "gnome-shell-st-boxlayout-invalid-natural-height",
@@ -490,6 +607,63 @@
     },
     "last_verified": "2026-08-06",
     "rel_path": "cases/gnome-shell/topchrome-input-region-click-through"
+  },
+  {
+    "id": "gnome-shell-two-column-app-grid-alignment",
+    "title": "2-column app icon grid aligns to left edge instead of centering in panel",
+    "status": "verified",
+    "stack": [
+      "gnome-shell",
+      "gjs",
+      "clutter",
+      "st"
+    ],
+    "versions": {
+      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
+      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)",
+      "dependencies": {
+        "mutter": ">= 42.0"
+      }
+    },
+    "environment": {
+      "hardware": "Any GPU",
+      "extra": "Wayland and X11 GNOME Shell Sessions"
+    },
+    "symptoms": [
+      "App icons arranged in a 2-column grid cling to the left edge of the dock panel, leaving an uneven right margin gap"
+    ],
+    "expected_behavior": "2-column app icon rows are centered symmetrically within the panel container",
+    "trigger": "Layout app icon pairs in a horizontal St.BoxLayout inside a vertical St.BoxLayout container",
+    "root_cause": "_appsBox (vertical St.BoxLayout with x_expand: true) aligns child rows starting at x = 0. Without wrapping each row pair in an St.Bin container configured with x_expand: true and Clutter.ActorAlign.CENTER, Clutter renders row content left-aligned.",
+    "failed_approaches": [
+      {
+        "approach": "Setting explicit pixel width (e.g. width: 124px) in CSS without St.Bin centering",
+        "result": "Renders 2-column row aligned to left edge of panel container"
+      }
+    ],
+    "fix_summary": "Enclose each pair of app icons in an St.Bin row frame configured with x_expand: true, x_align: Clutter.ActorAlign.CENTER, and y_align: Clutter.ActorAlign.CENTER, containing an inner St.BoxLayout row with spacing: 12px.",
+    "verification": {
+      "automated": true,
+      "command": "node --check right-dock@pasynkov/appSync.js",
+      "manual_steps": [
+        "Open side panel with 2-column app icon layout enabled",
+        "Verify icons are centered symmetrically with equal left and right margins"
+      ]
+    },
+    "regression_risks": [
+      "Row frame overflowing panel width if spacing or padding is oversized"
+    ],
+    "sources": [
+      "https://gjs.guide/extensions/topics/layout.html"
+    ],
+    "upstream": {
+      "project": "GNOME/gjs-guide",
+      "issue": null,
+      "merge_request": null,
+      "status": "not-submitted"
+    },
+    "last_verified": "2026-08-07",
+    "rel_path": "cases/gnome-shell/two-column-app-grid-alignment"
   },
   {
     "id": "gnome-shell-window-struts-reserved-space",

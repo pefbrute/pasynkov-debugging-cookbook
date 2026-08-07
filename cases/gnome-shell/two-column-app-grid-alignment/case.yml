@@ -1,0 +1,41 @@
+id: gnome-shell-two-column-app-grid-alignment
+title: "2-column app icon grid aligns to left edge instead of centering in panel"
+status: verified
+stack:
+  - gnome-shell
+  - gjs
+  - clutter
+  - st
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any GPU"
+  extra: "Wayland and X11 GNOME Shell Sessions"
+symptoms:
+  - "App icons arranged in a 2-column grid cling to the left edge of the dock panel, leaving an uneven right margin gap"
+expected_behavior: "2-column app icon rows are centered symmetrically within the panel container"
+trigger: "Layout app icon pairs in a horizontal St.BoxLayout inside a vertical St.BoxLayout container"
+root_cause: "_appsBox (vertical St.BoxLayout with x_expand: true) aligns child rows starting at x = 0. Without wrapping each row pair in an St.Bin container configured with x_expand: true and Clutter.ActorAlign.CENTER, Clutter renders row content left-aligned."
+failed_approaches:
+  - approach: "Setting explicit pixel width (e.g. width: 124px) in CSS without St.Bin centering"
+    result: "Renders 2-column row aligned to left edge of panel container"
+fix_summary: "Enclose each pair of app icons in an St.Bin row frame configured with x_expand: true, x_align: Clutter.ActorAlign.CENTER, and y_align: Clutter.ActorAlign.CENTER, containing an inner St.BoxLayout row with spacing: 12px."
+verification:
+  automated: true
+  command: "node --check right-dock@pasynkov/appSync.js"
+  manual_steps:
+    - "Open side panel with 2-column app icon layout enabled"
+    - "Verify icons are centered symmetrically with equal left and right margins"
+regression_risks:
+  - "Row frame overflowing panel width if spacing or padding is oversized"
+sources:
+  - "https://gjs.guide/extensions/topics/layout.html"
+upstream:
+  project: "GNOME/gjs-guide"
+  issue: null
+  merge_request: null
+  status: not-submitted
+last_verified: "2026-08-07"

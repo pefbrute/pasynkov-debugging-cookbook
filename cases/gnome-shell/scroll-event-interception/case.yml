@@ -1,0 +1,43 @@
+id: gnome-shell-scroll-event-interception
+title: "Mouse wheel scrolling blocked by child actor event interception and visible StScrollBar"
+status: verified
+stack:
+  - gnome-shell
+  - gjs
+  - st
+  - clutter
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, St, Clutter)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any GPU"
+  extra: "Wayland and X11 GNOME Shell Sessions"
+symptoms:
+  - "Mouse wheel scrolling over application icons inside St.ScrollView is ignored or blocked"
+  - "Default StScrollBar renders a wide, unwanted visible scrollbar over dock content"
+expected_behavior: "St.ScrollView scrolls smoothly when wheeling over child actors, while scrollbar is styled completely invisible"
+trigger: "Scroll mouse wheel while hovering application icon actors inside St.ScrollView"
+root_cause: "Child actors (DockAppIcon) intercept scroll-event and return Clutter.EVENT_STOP to cycle active windows, stopping scroll events from bubbling to St.ScrollView. Default StScrollBar lacks zero-width CSS rules."
+failed_approaches:
+  - approach: "Returning Clutter.EVENT_STOP on child icon scroll-event without modifier check"
+    result: "Intercepts all mouse wheel events and prevents St.ScrollView from receiving scroll events"
+fix_summary: "Return Clutter.EVENT_PROPAGATE for standard mouse wheel scrolling on child icon actors (reserving window cycling for Shift + Scroll), attach scroll-event handler to St.ScrollView (vscrollbar_policy: AUTOMATIC), and enforce width: 0px !important; opacity: 0 !important; in CSS."
+verification:
+  automated: true
+  command: "node --check right-dock@pasynkov/appIcon.js"
+  manual_steps:
+    - "Hover over application icon grid in panel"
+    - "Scroll mouse wheel up and down"
+    - "Verify panel scrolls smoothly and scrollbar is invisible"
+regression_risks:
+  - "Shift+Scroll window cycling conflicting with scroll direction"
+sources:
+  - "https://gnome.pages.gitlab.gnome.org/mutter/clutter/class.Actor.html"
+upstream:
+  project: "GNOME/gjs-guide"
+  issue: null
+  merge_request: null
+  status: not-submitted
+last_verified: "2026-08-07"

@@ -37,13 +37,16 @@ Run `python3 tools/build_dataset.py` to regenerate these dataset artifacts.
 | Stack | Case | Status |
 |---|---|---|
 | GNOME Shell | [Custom PopupMenu stays open when clicking outside on desktop or workspace](cases/gnome-shell/click-outside-menu-dismissal/) | Verified |
+| GNOME Shell | [Cluttered top control button stack and missing native dock background right-click context menu](cases/gnome-shell/dock-background-context-menu/) | Verified |
 | GNOME Shell | [Extension preferences window fails to open or doesn't raise to front on repeated click](cases/gnome-shell/extension-prefs-dbus-spawn-focus/) | Verified |
 | GNOME Shell | [Dock extension fails to hide or stays visible over fullscreen games during Alt+Tab](cases/gnome-shell/fullscreen-dock-autohide/) | Verified |
 | GNOME Shell | [Context menu switches to adjacent items on hover due to shared PopupMenuManager](cases/gnome-shell/popup-menu-hover-switch/) | Verified |
+| GNOME Shell | [Mouse wheel scrolling blocked by child actor event interception and visible StScrollBar](cases/gnome-shell/scroll-event-interception/) | Verified |
 | GNOME Shell | [GNOME Shell St.BoxLayout returns invalid natural height 4294967296 and collapses St.ScrollView to 1px](cases/gnome-shell/st-boxlayout-invalid-natural-height/) | Verified |
 | GNOME Shell | [Stolen statusArea indicators distorted or misaligned in custom grid](cases/gnome-shell/stolen-tray-indicator-alignment/) | Verified |
 | GNOME Shell | [Hiding top panel with opacity=0 leaves an invisible top dead zone](cases/gnome-shell/top-panel-opacity-invisible-strip/) | Verified |
 | GNOME Shell | [Custom popup or window preview is visible but mouse clicks pass through to underlying windows](cases/gnome-shell/topchrome-input-region-click-through/) | Verified |
+| GNOME Shell | [2-column app icon grid aligns to left edge instead of centering in panel](cases/gnome-shell/two-column-app-grid-alignment/) | Verified |
 | GNOME Shell | [Maximized windows extend under custom GNOME Shell panel or dock](cases/gnome-shell/window-struts-reserved-space/) | Verified |
 <!-- CASE_CATALOG_END -->
 

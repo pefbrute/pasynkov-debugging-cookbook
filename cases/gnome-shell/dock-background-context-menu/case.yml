@@ -1,0 +1,42 @@
+id: gnome-shell-dock-background-context-menu
+title: "Cluttered top control button stack and missing native dock background right-click context menu"
+status: verified
+stack:
+  - gnome-shell
+  - gjs
+  - clutter
+  - st
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any GPU"
+  extra: "Wayland and X11 GNOME Shell Sessions"
+symptoms:
+  - "Top of panel is crowded with multiple control buttons, reducing vertical space for app icons"
+  - "Right-clicking dock background or empty space does not show panel context menu"
+expected_behavior: "Top of panel retains 1 App Grid button, navigation is consolidated in status area, and right-clicking dock background opens a native PopupMenu"
+trigger: "Right click empty dock background or panel separators"
+root_cause: "Stacking 3 control buttons at top of panel wastes vertical real estate. Lacking a button-press-event (button 3) listener on container actors prevents native background context menu invocation."
+failed_approaches:
+  - approach: "Adding right click handler to root container without filtering child events"
+    result: "Intercepts clicks meant for child tray icons or app icon context menus"
+fix_summary: "Keep 1 App Grid button at top, move Workspaces and Settings to status area, attach button 3 right-click listener to _appsScrollView using _isDockBackgroundSource check, and trigger native PopupMenu.PopupMenu."
+verification:
+  automated: true
+  command: "node --check right-dock@pasynkov/extension.js"
+  manual_steps:
+    - "Right click background area of dock panel"
+    - "Verify PopupMenu opens with Settings, Workspaces, and App Grid options"
+regression_risks:
+  - "Interference with child icon right-click context menus"
+sources:
+  - "https://gjs.guide/extensions/topics/popup-menu.html"
+upstream:
+  project: "GNOME/gjs-guide"
+  issue: null
+  merge_request: null
+  status: not-submitted
+last_verified: "2026-08-07"
