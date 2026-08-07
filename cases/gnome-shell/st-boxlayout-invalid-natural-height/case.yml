@@ -16,21 +16,23 @@ environment:
   extra: "Wayland and X11 GNOME Shell 42.9 Sessions"
 symptoms:
   - "St.ScrollView inside a vertical St.BoxLayout collapses to 1px height under unconstrained layout queries"
-  - "App launcher or icon grid is created but invisible on screen despite appsScroll=1, appsBox=1, status=4294967040 in debug logs"
-  - "get_preferred_height(-1) returns oversized natural height query breaking container height allocation math"
+  - "App launcher or icon grid is created but invisible on screen (appsScroll=1, appsBox=1 in debug logs)"
+  - "Custom child actor returns anomalously large natural height when queried with for_width=-1 (negative unconstrained query per Clutter API contract)"
 expected_behavior: "St.ScrollView expands smoothly within the vertical St.BoxLayout according to available container space, displaying icon grids correctly without collapsing to 1px"
-trigger: "Add a custom grid layout container inside a St.ScrollView within a vertical St.BoxLayout, where a child actor has conflicting alignment, missing min-size, or calls queue_relayout during construction"
-root_cause: "Unconstrained preferred height queries (for_width = -1) under conflicting child alignment flags cause layout allocation calculation failures. Values logged near 2^32 match float32 precision step bounds (ULP = 256). Setting explicit x_expand/y_expand flags and eliminating conflicting container alignment restores proper adaptive layout allocation."
+trigger: "Custom grid actor placed inside St.ScrollView does not sanitize negative forWidth values inside vfunc_get_preferred_height, causing the returned height to be negative or invalid"
+root_cause: "Clutter passes negative for_width values as a documented unconstrained query (API contract: 'a negative value to indicate that no width is defined'). The custom ChildGridActor fails to handle this case, producing a negative or invalid natural height. The exact mechanism by which this negative GJS value becomes the large anomalous number visible in logs was not confirmed from Clutter/Mutter source — the origin may be a cast, arithmetic overflow, or logging conversion at a later pipeline stage."
 
 
 failed_approaches:
   - approach: "Setting arbitrary min-height in CSS without resolving alignment conflicts"
     result: "ScrollView stays fixed size or clips content without responding dynamically to panel size changes"
   - approach: "Calling actor.queue_relayout() inside container build constructor"
-    result: "Triggers recursive layout recalculation during GObject init causing state inconsistency and empty AppFavorites race condition"
+    result: "Triggers recursive layout recalculation during GObject init causing state inconsistency"
+  - approach: "Using get_parent().get_width() as fallback inside vfunc_get_preferred_height"
+    result: "Parent may not yet have an allocation at preferred-size query time; get_width() returns natural width, creating a hidden circular dependency in the preferred-size calculation (Clutter docs: get_width() returns natural width when no allocation exists)"
   - approach: "Relying on multiple parent actors to manage child geometry simultaneously"
     result: "Creates geometry owner conflict where competing actors continuously override allocation boxes"
-fix_summary: "Remove conflicting x_align/y_align parameters on container actors, set explicit min-width and min-height constraints on custom actors, avoid calling queue_relayout during construct, safely reset preferred size using set_height(-1), and establish a single geometry owner per layout hierarchy."
+fix_summary: "Implement defensive forWidth handling in vfunc_get_preferred_height: use intrinsic grid width as fallback when forWidth is negative (not parent.get_width()), guard zero-column edge case with Math.max(1, ...), and clamp return value with Math.max(0, natH). Optionally set x_expand/y_expand to change the preferred-size query path at the layout level — this is a workaround, not a fix, as layout managers may still issue unconstrained queries."
 verification:
   automated: true
   command: "bash verify.sh"
