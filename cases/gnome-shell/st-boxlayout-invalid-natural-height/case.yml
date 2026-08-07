@@ -1,0 +1,52 @@
+id: gnome-shell-st-boxlayout-invalid-natural-height
+title: "GNOME Shell St.BoxLayout returns invalid natural height 4294967296 and collapses St.ScrollView to 1px"
+status: verified
+stack:
+  - gnome-shell
+  - gjs
+  - clutter
+  - st
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any x86_64 / AArch64 GPU"
+  extra: "Wayland and X11 GNOME Shell Sessions"
+symptoms:
+  - "St.ScrollView inside a vertical St.BoxLayout collapses to 1px height when child grid layout returns naturalHeight = 4294967296"
+  - "App launcher or icon grid is created but invisible on screen despite appsScroll=1, appsBox=1, status=4294967040 in debug logs"
+  - "get_preferred_height() returns naturalHeight = 4294967296 (uint32 sentinel for -1) breaking container height allocation math"
+expected_behavior: "St.ScrollView expands smoothly within the vertical St.BoxLayout according to available container space, displaying icon grids correctly without collapsing to 1px"
+trigger: "Add a custom grid layout container inside a St.ScrollView within a vertical St.BoxLayout, where a child actor has conflicting alignment, missing min-size, or calls queue_relayout during construction"
+root_cause: "Child layout actor returns an unconstrained preferred height sentinel (-1), which when stored or converted to unsigned 32-bit integer (uint32) in Clutter/St C layout math becomes 4294967296 (2^32). When vertical St.BoxLayout calculates natural height allocations across siblings, this overflowed value forces St.ScrollView to allocate 1px minimum height instead of remaining available vertical space."
+failed_approaches:
+  - approach: "Setting arbitrary min-height in CSS without resolving alignment conflicts"
+    result: "ScrollView stays fixed size or clips content without responding dynamically to panel size changes"
+  - approach: "Calling actor.queue_relayout() inside container build constructor"
+    result: "Triggers recursive layout recalculation during GObject init causing state inconsistency and empty AppFavorites race condition"
+  - approach: "Relying on multiple parent actors to manage child geometry simultaneously"
+    result: "Creates geometry owner conflict where competing actors continuously override allocation boxes"
+fix_summary: "Remove conflicting x_align/y_align parameters on container actors, set explicit min-width and min-height constraints on custom actors, avoid calling queue_relayout during construct, safely reset preferred size using set_height(-1), and establish a single geometry owner per layout hierarchy."
+verification:
+  automated: true
+  command: "bash verify.sh"
+  manual_steps:
+    - "Install and enable minimal reproduction extension in GNOME Shell"
+    - "Open side panel or dock containing St.ScrollView"
+    - "Verify that appsScroll allocation height is greater than 100px and icons render properly"
+    - "Verify naturalHeight is positive and <= available monitor height"
+regression_risks:
+  - "ScrollView overflowing panel boundary when total item count is small"
+  - "Transient empty AppFavorites grid on initial GNOME Shell startup if AppSystem is not ready"
+  - "Accessing disposed DockAppIcon references during async icon rebuild"
+sources:
+  - "https://gjs.guide/extensions/topics/layout.html"
+  - "https://gnome.pages.gitlab.gnome.org/mutter/st/class.BoxLayout.html"
+upstream:
+  project: "GNOME/gnome-shell"
+  issue: null
+  merge_request: null
+  status: not-submitted
+last_verified: "2026-08-07"

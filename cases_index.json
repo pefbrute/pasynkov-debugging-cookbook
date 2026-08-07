@@ -1,5 +1,68 @@
 [
   {
+    "id": "gnome-shell-autohide-state-lock",
+    "title": "Autohide dock panel stuck hidden off-screen or fails to slide out on hover",
+    "status": "verified",
+    "stack": [
+      "gnome-shell",
+      "gjs",
+      "clutter",
+      "mutter"
+    ],
+    "versions": {
+      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
+      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter, Mutter)",
+      "dependencies": {
+        "mutter": ">= 42.0"
+      }
+    },
+    "environment": {
+      "hardware": "Any GPU",
+      "extra": "Wayland and X11 GNOME Shell Sessions"
+    },
+    "symptoms": [
+      "Dock panel remains completely invisible and stuck off-screen after enabling extension",
+      "Moving mouse cursor to monitor edge fails to bring dock back on screen"
+    ],
+    "expected_behavior": "Dock panel initializes smoothly in visible state and responds reliably to mouse edge hover triggers",
+    "trigger": "Enable dock extension with autohide manager initializing default state = 'shown' without translation_x reset",
+    "root_cause": "AutohideManager initialized internal state = 'shown' in constructor. Calling showDock() evaluated if (this._state === 'shown') return and returned early without setting actor.translation_x = 0. Scheduled hide passes missing autohideMode === 0 guards moved slider off-screen.",
+    "failed_approaches": [
+      {
+        "approach": "Initializing _state = 'shown' while slider actor starts with default off-screen coordinates",
+        "result": "showDock() short-circuits thinking panel is already visible while actor remains hidden off-screen"
+      },
+      {
+        "approach": "Invoking hideDock() without checking autohideMode === 0",
+        "result": "Scheduled hide passes translate panel off-screen even when set to Always Visible mode"
+      }
+    ],
+    "fix_summary": "Initialize _state = 'hidden' in AutohideManager constructor, pass showDock(true) force override on extension enable, and enforce autohideMode === 0 guard in hideDock().",
+    "verification": {
+      "automated": true,
+      "command": "node --check right-dock@pasynkov/autohide.js",
+      "manual_steps": [
+        "Enable extension",
+        "Verify dock panel is immediately visible on screen",
+        "Switch to autohide mode and move mouse to edge to test pop out"
+      ]
+    },
+    "regression_risks": [
+      "Dock failing to hide if pressure barrier callback fails to fire"
+    ],
+    "sources": [
+      "https://gnome.pages.gitlab.gnome.org/mutter/clutter/class.Actor.html"
+    ],
+    "upstream": {
+      "project": "GNOME/gnome-shell",
+      "issue": null,
+      "merge_request": null,
+      "status": "not-submitted"
+    },
+    "last_verified": "2026-08-07",
+    "rel_path": "cases/gnome-shell/autohide-state-lock"
+  },
+  {
     "id": "gnome-shell-click-outside-menu-dismissal",
     "title": "Custom PopupMenu stays open when clicking outside on desktop or workspace",
     "status": "verified",
@@ -56,6 +119,64 @@
     },
     "last_verified": "2026-08-06",
     "rel_path": "cases/gnome-shell/click-outside-menu-dismissal"
+  },
+  {
+    "id": "gnome-shell-disposed-gobject-access-crash",
+    "title": "GJS throws fatal error accessing already disposed C/Clutter objects",
+    "status": "verified",
+    "stack": [
+      "gnome-shell",
+      "gjs",
+      "clutter",
+      "st"
+    ],
+    "versions": {
+      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
+      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)",
+      "dependencies": {
+        "mutter": ">= 42.0"
+      }
+    },
+    "environment": {
+      "hardware": "Any GPU",
+      "extra": "Wayland and X11 GNOME Shell Sessions"
+    },
+    "symptoms": [
+      "JS ERROR: Object St.Widget, has been already disposed — impossible to access it",
+      "Extension crash or aborted sync loop when calling methods on destroyed actor references"
+    ],
+    "expected_behavior": "Extension handles GObject lifecycle safely without accessing disposed C instances or leaking stale references in JS maps",
+    "trigger": "Reload extension, rebuild actor tree, or call methods on cached actor references after container destruction",
+    "root_cause": "Retaining JavaScript object references (such as Map or class fields) to C-level GObjects after they have been destroyed by Clutter container teardown. Calling GObject methods on disposed wrappers throws an unhandled GJS exception.",
+    "failed_approaches": [
+      {
+        "approach": "Calling actor.destroy() while keeping the actor inside a Map or class field",
+        "result": "Leaves stale wrapper reference that throws Error: Object has been already disposed when accessed"
+      }
+    ],
+    "fix_summary": "Remove references from JS maps/containers before calling destroy(), connect a destroy signal listener on each GObject to clear JS references automatically on disposal, and wrap property updates in try/catch or is_finalized check.",
+    "verification": {
+      "automated": true,
+      "command": "node --check right-dock@pasynkov/appSync.js",
+      "manual_steps": [
+        "Trigger rapid extension re-enable/reload",
+        "Verify journalctl logs contain no 'already disposed' errors"
+      ]
+    },
+    "regression_risks": [
+      "Dangling signal listeners if not disconnected on destroy"
+    ],
+    "sources": [
+      "https://gjs.guide/guides/gjs/memory-management.html"
+    ],
+    "upstream": {
+      "project": "GNOME/gjs-guide",
+      "issue": null,
+      "merge_request": null,
+      "status": "not-submitted"
+    },
+    "last_verified": "2026-08-07",
+    "rel_path": "cases/gnome-shell/disposed-gobject-access-crash"
   },
   {
     "id": "gnome-shell-extension-prefs-dbus-spawn-focus",
@@ -115,6 +236,68 @@
     },
     "last_verified": "2026-08-06",
     "rel_path": "cases/gnome-shell/extension-prefs-dbus-spawn-focus"
+  },
+  {
+    "id": "gnome-shell-favorites-transient-wipe",
+    "title": "Dock wipes favorite app icons during transient AppFavorites unreadiness or custom .desktop ID lookup",
+    "status": "verified",
+    "stack": [
+      "gnome-shell",
+      "gjs",
+      "shell"
+    ],
+    "versions": {
+      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
+      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Shell)",
+      "dependencies": {
+        "mutter": ">= 42.0"
+      }
+    },
+    "environment": {
+      "hardware": "Any GPU",
+      "extra": "Wayland and X11 GNOME Shell Sessions"
+    },
+    "symptoms": [
+      "Favorite application icons disappear from dock on GNOME Shell startup or GSettings reload",
+      "Custom user-installed desktop files (e.g. antigravity.desktop) fail to resolve to Shell.App instances"
+    ],
+    "expected_behavior": "Dock retains existing favorite icon actors during transient startup delay and resolves custom desktop files reliably",
+    "trigger": "Run app synchronization pass during initial GNOME Shell boot or update favorite-apps GSettings",
+    "root_cause": "Shell.AppSystem.lookup_app(id) returns null for custom desktop IDs during initial desktop file indexing. Additionally, AppFavorites.getAppFavorites().getFavorites() returns [] transiently while favorite-apps GSettings holds non-empty IDs. Running sync at this point evaluates addedSet.has(appId) = false and destroys all favorite icon actors.",
+    "failed_approaches": [
+      {
+        "approach": "Relying solely on Shell.AppSystem.get_default().lookup_app(id)",
+        "result": "Returns null for user-installed custom .desktop files not indexed in standard system paths"
+      },
+      {
+        "approach": "Unconditionally destroying icons missing from getFavorites() return list",
+        "result": "Wipes dock completely during transient GSettings loading phase"
+      }
+    ],
+    "fix_summary": "Add transient unreadiness check (configuredFavoriteIds.length > 0 && resolvedFavorites.length === 0), use Shell.App.new_for_desktop_id(id) fallback when lookup_app(id) returns null, subscribe to installed-changed on Shell.AppSystem, and retain existing favorite icons if favs transiently evaluates to [].",
+    "verification": {
+      "automated": true,
+      "command": "node --check right-dock@pasynkov/appSync.js",
+      "manual_steps": [
+        "Add custom .desktop file to favorite-apps list",
+        "Restart GNOME Shell",
+        "Verify custom favorite icons render cleanly and are not wiped"
+      ]
+    },
+    "regression_risks": [
+      "Stale favorite icons persisting if GSettings intentionally cleared to empty array"
+    ],
+    "sources": [
+      "https://gjs.guide/extensions/topics/shell-app-system.html"
+    ],
+    "upstream": {
+      "project": "GNOME/gjs-guide",
+      "issue": null,
+      "merge_request": null,
+      "status": "not-submitted"
+    },
+    "last_verified": "2026-08-07",
+    "rel_path": "cases/gnome-shell/favorites-transient-wipe"
   },
   {
     "id": "gnome-shell-fullscreen-dock-autohide",
@@ -182,6 +365,65 @@
     "rel_path": "cases/gnome-shell/fullscreen-dock-autohide"
   },
   {
+    "id": "gnome-shell-pango-markup-truncation-crash",
+    "title": "Truncating app or window title causes Pango markup syntax exception in St.Label",
+    "status": "verified",
+    "stack": [
+      "gnome-shell",
+      "gjs",
+      "st",
+      "glib"
+    ],
+    "versions": {
+      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
+      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, St, GLib)",
+      "dependencies": {
+        "mutter": ">= 42.0"
+      }
+    },
+    "environment": {
+      "hardware": "Any GPU",
+      "extra": "Wayland and X11 GNOME Shell Sessions"
+    },
+    "symptoms": [
+      "JS ERROR: Failed to set the markup of the actor: Error on line 1: Entity did not end with a semicolon",
+      "Tooltip or window preview title label fails to render and crashes execution path"
+    ],
+    "expected_behavior": "App and window titles truncate cleanly with ellipsis without throwing Pango markup syntax errors",
+    "trigger": "Set title markup on St.Label after truncating a string containing XML/HTML entities like &amp;",
+    "root_cause": "Calling .substring(0, N) on raw window titles truncates Pango entities mid-sequence (e.g. &amp; cut to &am). When passed to St.Label or GLib.markup_escape_text, malformed entities cause the Pango markup parser to fail.",
+    "failed_approaches": [
+      {
+        "approach": "Calling GLib.markup_escape_text(title) BEFORE truncating with .substring(0, N)",
+        "result": "Cuts escaped entities mid-sequence (e.g. &amp; cut to &am) causing markup parsing exception"
+      }
+    ],
+    "fix_summary": "Truncate raw plain text string FIRST using .substring(0, N), and then pass the truncated string to GLib.markup_escape_text(rawTitle, -1).",
+    "verification": {
+      "automated": true,
+      "command": "node --check right-dock@pasynkov/appIcon.js",
+      "manual_steps": [
+        "Open a window with title containing & or < > symbols (e.g. 'Foo & Bar Baz - Web Browser')",
+        "Hover over app icon or window preview card",
+        "Verify title displays cleanly without Pango errors in journalctl"
+      ]
+    },
+    "regression_risks": [
+      "Unescaped HTML entities rendering as raw text if markup_escape_text omitted"
+    ],
+    "sources": [
+      "https://docs.gtk.org/glib/func.markup_escape_text.html"
+    ],
+    "upstream": {
+      "project": "GNOME/gjs-guide",
+      "issue": null,
+      "merge_request": null,
+      "status": "not-submitted"
+    },
+    "last_verified": "2026-08-07",
+    "rel_path": "cases/gnome-shell/pango-markup-truncation-crash"
+  },
+  {
     "id": "gnome-shell-popup-menu-hover-switch",
     "title": "Context menu switches to adjacent items on hover due to shared PopupMenuManager",
     "status": "verified",
@@ -245,6 +487,137 @@
     },
     "last_verified": "2026-08-06",
     "rel_path": "cases/gnome-shell/popup-menu-hover-switch"
+  },
+  {
+    "id": "gnome-shell-scroll-event-interception",
+    "title": "Mouse wheel scrolling blocked by child actor event interception and visible StScrollBar",
+    "status": "verified",
+    "stack": [
+      "gnome-shell",
+      "gjs",
+      "st",
+      "clutter"
+    ],
+    "versions": {
+      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
+      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, St, Clutter)",
+      "dependencies": {
+        "mutter": ">= 42.0"
+      }
+    },
+    "environment": {
+      "hardware": "Any GPU",
+      "extra": "Wayland and X11 GNOME Shell Sessions"
+    },
+    "symptoms": [
+      "Mouse wheel scrolling over application icons inside St.ScrollView is ignored or blocked",
+      "Default StScrollBar renders a wide, unwanted visible scrollbar over dock content"
+    ],
+    "expected_behavior": "St.ScrollView scrolls smoothly when wheeling over child actors, while scrollbar is styled completely invisible",
+    "trigger": "Scroll mouse wheel while hovering application icon actors inside St.ScrollView",
+    "root_cause": "Child actors (DockAppIcon) intercept scroll-event and return Clutter.EVENT_STOP to cycle active windows, stopping scroll events from bubbling to St.ScrollView. Default StScrollBar lacks zero-width CSS rules.",
+    "failed_approaches": [
+      {
+        "approach": "Returning Clutter.EVENT_STOP on child icon scroll-event without modifier check",
+        "result": "Intercepts all mouse wheel events and prevents St.ScrollView from receiving scroll events"
+      }
+    ],
+    "fix_summary": "Return Clutter.EVENT_PROPAGATE for standard mouse wheel scrolling on child icon actors (reserving window cycling for Shift + Scroll), attach scroll-event handler to St.ScrollView (vscrollbar_policy: AUTOMATIC), and enforce width: 0px !important; opacity: 0 !important; in CSS.",
+    "verification": {
+      "automated": true,
+      "command": "node --check right-dock@pasynkov/appIcon.js",
+      "manual_steps": [
+        "Hover over application icon grid in panel",
+        "Scroll mouse wheel up and down",
+        "Verify panel scrolls smoothly and scrollbar is invisible"
+      ]
+    },
+    "regression_risks": [
+      "Shift+Scroll window cycling conflicting with scroll direction"
+    ],
+    "sources": [
+      "https://gnome.pages.gitlab.gnome.org/mutter/clutter/class.Actor.html"
+    ],
+    "upstream": {
+      "project": "GNOME/gjs-guide",
+      "issue": null,
+      "merge_request": null,
+      "status": "not-submitted"
+    },
+    "last_verified": "2026-08-07",
+    "rel_path": "cases/gnome-shell/scroll-event-interception"
+  },
+  {
+    "id": "gnome-shell-st-boxlayout-invalid-natural-height",
+    "title": "GNOME Shell St.BoxLayout returns invalid natural height 4294967296 and collapses St.ScrollView to 1px",
+    "status": "verified",
+    "stack": [
+      "gnome-shell",
+      "gjs",
+      "clutter",
+      "st"
+    ],
+    "versions": {
+      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
+      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)",
+      "dependencies": {
+        "mutter": ">= 42.0"
+      }
+    },
+    "environment": {
+      "hardware": "Any x86_64 / AArch64 GPU",
+      "extra": "Wayland and X11 GNOME Shell Sessions"
+    },
+    "symptoms": [
+      "St.ScrollView inside a vertical St.BoxLayout collapses to 1px height when child grid layout returns naturalHeight = 4294967296",
+      "App launcher or icon grid is created but invisible on screen despite appsScroll=1, appsBox=1, status=4294967040 in debug logs",
+      "get_preferred_height() returns naturalHeight = 4294967296 (uint32 sentinel for -1) breaking container height allocation math"
+    ],
+    "expected_behavior": "St.ScrollView expands smoothly within the vertical St.BoxLayout according to available container space, displaying icon grids correctly without collapsing to 1px",
+    "trigger": "Add a custom grid layout container inside a St.ScrollView within a vertical St.BoxLayout, where a child actor has conflicting alignment, missing min-size, or calls queue_relayout during construction",
+    "root_cause": "Child layout actor returns an unconstrained preferred height sentinel (-1), which when stored or converted to unsigned 32-bit integer (uint32) in Clutter/St C layout math becomes 4294967296 (2^32). When vertical St.BoxLayout calculates natural height allocations across siblings, this overflowed value forces St.ScrollView to allocate 1px minimum height instead of remaining available vertical space.",
+    "failed_approaches": [
+      {
+        "approach": "Setting arbitrary min-height in CSS without resolving alignment conflicts",
+        "result": "ScrollView stays fixed size or clips content without responding dynamically to panel size changes"
+      },
+      {
+        "approach": "Calling actor.queue_relayout() inside container build constructor",
+        "result": "Triggers recursive layout recalculation during GObject init causing state inconsistency and empty AppFavorites race condition"
+      },
+      {
+        "approach": "Relying on multiple parent actors to manage child geometry simultaneously",
+        "result": "Creates geometry owner conflict where competing actors continuously override allocation boxes"
+      }
+    ],
+    "fix_summary": "Remove conflicting x_align/y_align parameters on container actors, set explicit min-width and min-height constraints on custom actors, avoid calling queue_relayout during construct, safely reset preferred size using set_height(-1), and establish a single geometry owner per layout hierarchy.",
+    "verification": {
+      "automated": true,
+      "command": "bash verify.sh",
+      "manual_steps": [
+        "Install and enable minimal reproduction extension in GNOME Shell",
+        "Open side panel or dock containing St.ScrollView",
+        "Verify that appsScroll allocation height is greater than 100px and icons render properly",
+        "Verify naturalHeight is positive and <= available monitor height"
+      ]
+    },
+    "regression_risks": [
+      "ScrollView overflowing panel boundary when total item count is small",
+      "Transient empty AppFavorites grid on initial GNOME Shell startup if AppSystem is not ready",
+      "Accessing disposed DockAppIcon references during async icon rebuild"
+    ],
+    "sources": [
+      "https://gjs.guide/extensions/topics/layout.html",
+      "https://gnome.pages.gitlab.gnome.org/mutter/st/class.BoxLayout.html"
+    ],
+    "upstream": {
+      "project": "GNOME/gnome-shell",
+      "issue": null,
+      "merge_request": null,
+      "status": "not-submitted"
+    },
+    "last_verified": "2026-08-07",
+    "rel_path": "cases/gnome-shell/st-boxlayout-invalid-natural-height"
   },
   {
     "id": "gnome-shell-stolen-tray-indicator-alignment",

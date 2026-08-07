@@ -148,6 +148,13 @@ Track the progress of upstream submissions in `case.yml`:
 - `accepted`: Fix or documentation merged into upstream.
 - `rejected`: Upstream declined (record rationale in case prose).
 
+## Public Distribution & Search Optimization
+
+To make case investigations easily discoverable by developers using search engines and AI agents performing retrieval:
+
+- **Search Fingerprints**: Case titles and symptoms must include exact error strings, numeric constants (e.g. `4294967296`), API symbols (`St.BoxLayout`), and measurable geometry anomalies (`collapses St.ScrollView to 1px`).
+- **Multi-Platform Syndication**: Follow the [Public Distribution Guide](public-distribution-guide.md) to cross-post investigations to platforms like Habr, DEV Community (using `canonical_url`), Stack Overflow, GNOME Discourse, and Reddit while maintaining canonical links back to the repository and personal website.
+
 ## How AI agents should use the database
 
 

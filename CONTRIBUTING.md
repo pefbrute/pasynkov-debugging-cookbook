@@ -18,8 +18,15 @@ Do not promote a case after a single successful manual attempt. When automated
 verification is impossible, document multiple manual checks and attach
 sanitized logs, screenshots, or video.
 
-## Naming
+## Naming & Search Fingerprints
 
 Use `cases/<stack>/<symptom-in-kebab-case>/`. One directory represents one
 observable failure. Connect related failures with links instead of mixing them
 into one narrative.
+
+Ensure case titles and `symptoms` include exact **Search Fingerprints**:
+- Specific error strings and log output (e.g. `status=4294967040`).
+- Exact numeric constants and sentinels (e.g. `4294967296`, `uint32(-1)`).
+- API symbols, types, and UI elements (e.g. `St.BoxLayout`, `St.ScrollView`, `get_preferred_height`).
+
+For publishing cases across public sites (Habr, DEV.to, Stack Overflow, etc.), refer to the [Public Distribution Guide](docs/public-distribution-guide.md).

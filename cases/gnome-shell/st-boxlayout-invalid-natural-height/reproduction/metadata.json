@@ -1,0 +1,6 @@
+{
+  "uuid": "st-boxlayout-natural-height-repro@pasynkov.github.io",
+  "name": "St.BoxLayout Natural Height Overflow Repro",
+  "description": "Minimal reproduction for 4294967296 natural height uint32 overflow collapsing St.ScrollView",
+  "shell-version": ["42", "45", "46"]
+}

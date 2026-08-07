@@ -1,0 +1,14 @@
+[DEBUG] Actor hierarchy inspection:
+  StBoxLayout: minH=0, natH=4294967296, allocH=1080
+    StScrollView: minH=1, natH=4294967296, allocH=1
+      StWidget (ChildGridActor): minH=0, natH=4294967296, allocH=0
+
+[DIAGNOSTIC] Log output:
+appsScroll=1
+appsBox=1
+status=4294967040
+
+[FIX VERIFICATION] After setting explicit min-size and removing conflicting alignment:
+  StBoxLayout: minH=300, natH=300, allocH=1080
+    StScrollView: minH=300, natH=300, allocH=1080
+      StWidget (ChildGridActor): minH=300, natH=300, allocH=300

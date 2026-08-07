@@ -1,0 +1,43 @@
+id: gnome-shell-pango-markup-truncation-crash
+title: "Truncating app or window title causes Pango markup syntax exception in St.Label"
+status: verified
+stack:
+  - gnome-shell
+  - gjs
+  - st
+  - glib
+versions:
+  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
+  runtime: "GNOME Shell 42 / 45 / 46 (GJS, St, GLib)"
+  dependencies:
+    mutter: ">= 42.0"
+environment:
+  hardware: "Any GPU"
+  extra: "Wayland and X11 GNOME Shell Sessions"
+symptoms:
+  - "JS ERROR: Failed to set the markup of the actor: Error on line 1: Entity did not end with a semicolon"
+  - "Tooltip or window preview title label fails to render and crashes execution path"
+expected_behavior: "App and window titles truncate cleanly with ellipsis without throwing Pango markup syntax errors"
+trigger: "Set title markup on St.Label after truncating a string containing XML/HTML entities like &amp;"
+root_cause: "Calling .substring(0, N) on raw window titles truncates Pango entities mid-sequence (e.g. &amp; cut to &am). When passed to St.Label or GLib.markup_escape_text, malformed entities cause the Pango markup parser to fail."
+failed_approaches:
+  - approach: "Calling GLib.markup_escape_text(title) BEFORE truncating with .substring(0, N)"
+    result: "Cuts escaped entities mid-sequence (e.g. &amp; cut to &am) causing markup parsing exception"
+fix_summary: "Truncate raw plain text string FIRST using .substring(0, N), and then pass the truncated string to GLib.markup_escape_text(rawTitle, -1)."
+verification:
+  automated: true
+  command: "node --check right-dock@pasynkov/appIcon.js"
+  manual_steps:
+    - "Open a window with title containing & or < > symbols (e.g. 'Foo & Bar Baz - Web Browser')"
+    - "Hover over app icon or window preview card"
+    - "Verify title displays cleanly without Pango errors in journalctl"
+regression_risks:
+  - "Unescaped HTML entities rendering as raw text if markup_escape_text omitted"
+sources:
+  - "https://docs.gtk.org/glib/func.markup_escape_text.html"
+upstream:
+  project: "GNOME/gjs-guide"
+  issue: null
+  merge_request: null
+  status: not-submitted
+last_verified: "2026-08-07"
