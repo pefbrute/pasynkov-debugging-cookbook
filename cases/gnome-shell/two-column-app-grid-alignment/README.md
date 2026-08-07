@@ -6,8 +6,9 @@ To center a multi-column row grid symmetrically inside a vertical `St.BoxLayout`
 
 ## Environment
 
-- **OS**: Ubuntu 22.04 LTS / Ubuntu 24.04 LTS
-- **Runtime**: GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)
+- **OS**: Ubuntu 22.04.5 LTS (Linux x86_64, Kernel 6.8.0)
+- **Runtime**: GNOME Shell 42.9 (GJS 1.72.4)
+- **Hardware**: 13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics
 - **Session**: Wayland & X11
 
 ## Fix

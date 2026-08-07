@@ -7,13 +7,13 @@ stack:
   - st
   - mutter
 versions:
-  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
-  runtime: "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)"
+  os: "Ubuntu 22.04.5 LTS (Linux x86_64)"
+  runtime: "GNOME Shell 42.9 (GJS 1.72.4)"
   dependencies:
     mutter: ">= 42.0"
 environment:
-  hardware: "Any GPU"
-  extra: "Wayland and X11 GNOME Shell Sessions"
+  hardware: "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics"
+  extra: "Wayland and X11 GNOME Shell 42.9 Sessions"
 symptoms:
   - "Custom popover or window preview card is rendered on screen but ignores mouse clicks"
   - "Clicks pass through the preview card and activate elements in windows underneath"

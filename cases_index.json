@@ -9,15 +9,15 @@
       "clutter"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any GPU",
-      "extra": "Wayland and X11 GNOME Shell Sessions"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "Custom PopupMenu or popover remains open when clicking outside on another window, background, or panel",
@@ -68,15 +68,15 @@
       "st"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any GPU",
-      "extra": "Wayland and X11 GNOME Shell Sessions"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "Top of panel is crowded with multiple control buttons, reducing vertical space for app icons",
@@ -125,15 +125,15 @@
       "meta"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Meta)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any GPU",
-      "extra": "Wayland and X11 GNOME Shell Sessions"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "Clicking extension settings button throws JS signature error across GNOME Shell versions",
@@ -185,15 +185,15 @@
       "clutter"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any GPU",
-      "extra": "Fullscreen 3D Games / Applications (Wayland and X11)"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "Dock stays visible over fullscreen game windows when switching windows via Alt+Tab",
@@ -249,15 +249,15 @@
       "clutter"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any x86_64 / AArch64 GPU",
-      "extra": "Wayland and X11 GNOME Shell Sessions"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "After opening a context menu (app icon or stolen tray indicator), moving the mouse pointer across adjacent icons immediately closes the current menu and opens the menu of the hovered icon without clicking",
@@ -315,15 +315,15 @@
       "clutter"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, St, Clutter)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any GPU",
-      "extra": "Wayland and X11 GNOME Shell Sessions"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "Mouse wheel scrolling over application icons inside St.ScrollView is ignored or blocked",
@@ -374,15 +374,15 @@
       "st"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any x86_64 / AArch64 GPU",
-      "extra": "Wayland and X11 GNOME Shell Sessions"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "St.ScrollView inside a vertical St.BoxLayout collapses to 1px height when child grid layout returns naturalHeight = 4294967296",
@@ -445,15 +445,15 @@
       "clutter"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, St, Clutter)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any GPU",
-      "extra": "Wayland and X11 GNOME Shell Sessions"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "Stolen GNOME Shell statusArea indicators render stretched, oversized, or misaligned with huge padding in custom tray grid"
@@ -502,15 +502,15 @@
       "mutter"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, St)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any GPU",
-      "extra": "Wayland and X11 GNOME Shell Sessions"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "Top panel is transparent, but top 32px of monitor is unresponsive to window clicks or window title drag"
@@ -560,15 +560,15 @@
       "mutter"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any GPU",
-      "extra": "Wayland and X11 GNOME Shell Sessions"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "Custom popover or window preview card is rendered on screen but ignores mouse clicks",
@@ -619,15 +619,15 @@
       "st"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Clutter, St)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any GPU",
-      "extra": "Wayland and X11 GNOME Shell Sessions"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "App icons arranged in a 2-column grid cling to the left edge of the dock panel, leaving an uneven right margin gap"
@@ -674,15 +674,15 @@
       "mutter"
     ],
     "versions": {
-      "os": "Ubuntu 22.04 / 24.04 LTS (Linux)",
-      "runtime": "GNOME Shell 42 / 45 / 46 (GJS, Mutter)",
+      "os": "Ubuntu 22.04.5 LTS (Linux x86_64)",
+      "runtime": "GNOME Shell 42.9 (GJS 1.72.4)",
       "dependencies": {
         "mutter": ">= 42.0"
       }
     },
     "environment": {
-      "hardware": "Any GPU",
-      "extra": "Wayland and X11 GNOME Shell Sessions"
+      "hardware": "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics",
+      "extra": "Wayland and X11 GNOME Shell 42.9 Sessions"
     },
     "symptoms": [
       "Maximized application windows slide underneath the custom panel/dock",

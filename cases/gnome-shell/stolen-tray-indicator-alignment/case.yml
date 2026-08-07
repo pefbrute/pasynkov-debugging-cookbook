@@ -6,13 +6,13 @@ stack:
   - st
   - clutter
 versions:
-  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
-  runtime: "GNOME Shell 42 / 45 / 46 (GJS, St, Clutter)"
+  os: "Ubuntu 22.04.5 LTS (Linux x86_64)"
+  runtime: "GNOME Shell 42.9 (GJS 1.72.4)"
   dependencies:
     mutter: ">= 42.0"
 environment:
-  hardware: "Any GPU"
-  extra: "Wayland and X11 GNOME Shell Sessions"
+  hardware: "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics"
+  extra: "Wayland and X11 GNOME Shell 42.9 Sessions"
 symptoms:
   - "Stolen GNOME Shell statusArea indicators render stretched, oversized, or misaligned with huge padding in custom tray grid"
 expected_behavior: "Stolen tray indicators preserve active state and render cleanly in 32x32px slots inside a 3-column row grid"

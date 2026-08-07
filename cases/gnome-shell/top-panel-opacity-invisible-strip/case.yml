@@ -6,13 +6,13 @@ stack:
   - st
   - mutter
 versions:
-  os: "Ubuntu 22.04 / 24.04 LTS (Linux)"
-  runtime: "GNOME Shell 42 / 45 / 46 (GJS, St)"
+  os: "Ubuntu 22.04.5 LTS (Linux x86_64)"
+  runtime: "GNOME Shell 42.9 (GJS 1.72.4)"
   dependencies:
     mutter: ">= 42.0"
 environment:
-  hardware: "Any GPU"
-  extra: "Wayland and X11 GNOME Shell Sessions"
+  hardware: "13th Gen Intel Core i7-1355U / Intel Raptor Lake Graphics"
+  extra: "Wayland and X11 GNOME Shell 42.9 Sessions"
 symptoms:
   - "Top panel is transparent, but top 32px of monitor is unresponsive to window clicks or window title drag"
 expected_behavior: "Top panel is completely removed from layout, allowing windows to occupy the top 32px seamlessly"
