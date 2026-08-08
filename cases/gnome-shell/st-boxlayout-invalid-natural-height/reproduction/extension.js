@@ -21,7 +21,7 @@ class ReproExtension {
             y_expand: true,
         });
 
-        // Problematic child grid actor returning unconstrained preferred height (-1 -> uint32 4294967296)
+        // Problematic child grid actor returning unconstrained preferred height (-1 -> natH near 2^32, mechanism unconfirmed)
         const gridActor = new St.Widget({
             x_align: Clutter.ActorAlign.FILL,
             y_align: Clutter.ActorAlign.FILL,

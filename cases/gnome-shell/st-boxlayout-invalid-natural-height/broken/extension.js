@@ -1,4 +1,4 @@
-/* Broken Implementation: Unconstrained alignment causes uint32(-1) overflow */
+/* Broken Implementation: Unconstrained alignment causes natH near 2^32 (mechanism unconfirmed, Clutter uses gfloat* not guint) */
 const { St, Clutter } = imports.gi;
 
 function buildBrokenLayout() {
